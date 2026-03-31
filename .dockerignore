@@ -1,3 +1,4 @@
 referencias/
 node_modules/
 database/
+*.rest

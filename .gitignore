@@ -2,3 +2,4 @@ referencias/
 node_modules/
 *.yaml
 database/
+*.rest

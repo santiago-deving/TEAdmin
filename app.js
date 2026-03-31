@@ -4,6 +4,7 @@ const session = require("express-session")
 require("dotenv").config();
  
 const db = require("./db");
+const verificarLogin = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
 app.set('view engine', 'ejs');
@@ -25,6 +26,15 @@ app.use(session({
 app.get("/", (req,res)=>{
     res.render('inicio');
 });
+
+app.get("/pacientes",verificarLogin,(req,res)=>{
+    res.send("Acesso à área de pacientes")
+})
+
+app.post("/logar",(req,res)=>{
+    req.session.usuario = "usuario existente";
+    res.send("login autorizado!");
+})
 
 app.listen(port, ()=>{
     console.log(`Express rodando na em: http://0.0.0.0:${port}`);
