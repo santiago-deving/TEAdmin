@@ -19,3 +19,5 @@ async function connect() { // CONEXÃO COM O DB POSTGRES
     global.connection = pool;
     return pool.connect();
 }
+
+module.exports = { connect };
