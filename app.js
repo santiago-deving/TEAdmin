@@ -27,8 +27,16 @@ app.get("/", (req,res)=>{
     res.render('inicio');
 });
 
-app.get("/pacientes",verificarLogin,(req,res)=>{
-    res.send("Acesso à área de pacientes")
+app.get("/pacientes",verificarLogin, async (req,res)=>{
+    const client = await db.connect();
+
+    const result = await client.query('SELECT * FROM pacientes');
+
+    console.log(result);
+
+    client.release();
+
+    res.json(`Acesso à área de pacientes: ${result.rows}`)
 })
 
 app.post("/logar",(req,res)=>{

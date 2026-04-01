@@ -9,6 +9,7 @@ async function connect() { // CONEXÃO COM O DB POSTGRES
  
     //apenas testando a conexão
     const client = await pool.connect();
+    await client.query('SET search_path TO teadmin');
     console.log("Criou pool de conexões no PostgreSQL!");
  
     const res = await client.query('SELECT NOW()');
