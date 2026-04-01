@@ -1,0 +1,149 @@
+/* ===== HEADER ===== */
+.header {
+    background-color: var(--azul);
+    color: var(--branco);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--sombra);
+}
+
+.header-logo h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.95rem;
+}
+
+.btn-sair {
+    background-color: var(--vermelho);
+    color: var(--branco);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-sair:hover {
+    background-color: #c0392b;
+}
+
+/* ===== PAINEL ===== */
+.painel-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* ===== BOAS VINDAS ===== */
+.boas-vindas {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: var(--sombra);
+    border-left: 6px solid var(--verde);
+}
+
+.boas-vindas h2 {
+    font-size: 1.4rem;
+    color: var(--azul);
+}
+
+.boas-vindas p {
+    margin-top: 6px;
+    color: var(--cinza-texto);
+}
+
+/* ===== CARDS ===== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.card h3 {
+    font-size: 1rem;
+    color: var(--azul);
+    font-weight: 700;
+}
+
+.card p {
+    font-size: 0.82rem;
+    color: var(--cinza-texto);
+    margin-top: 6px;
+}
+
+/* ===== FREQUÊNCIA ===== */
+.frequencia-section {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: var(--sombra);
+}
+
+.frequencia-section h2 {
+    font-size: 1.2rem;
+    color: var(--azul);
+    margin-bottom: 20px;
+}
+
+.frequencia-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.terapeuta-nome {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cinza-texto);
+}
+
+.barra-container {
+    background-color: #e0e0e0;
+    border-radius: 50px;
+    overflow: hidden;
+    height: 36px;
+}
+
+.barra {
+    height: 100%;
+    border-radius: 50px;
+    color: var(--branco);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    font-size: 0.9rem;
+    transition: width 0.6s ease;
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAdm - Painel do Terapeuta</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/painel-terapeuta.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-logo">
+            <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
+        </div>
+        <div class="header-info">
+            <span class="status-online">● Online</span>
+            <span>👤 Dr(a). <span id="nome-terapeuta">...</span></span>
+            <a href="/pages/login.html" class="btn-sair">Sair</a>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="painel-container">
+
+        <!-- BOAS VINDAS -->
+        <div class="boas-vindas">
+            <h2>👩‍⚕️ Bem-vindo(a), Dr(a). <span id="nome-boas-vindas">...</span>!</h2>
+            <p>Gerencie seus pacientes e agenda pelo painel abaixo</p>
+        </div>
+
+        <!-- GRID PRINCIPAL -->
+        <div class="grid-principal">
+
+            <!-- ACOMPANHAMENTO DE FREQUÊNCIA -->
+            <section class="card-secao">
+                <div class="secao-header">
+                    <h2>📋 Acompanhamento de Frequência</h2>
+                    <span class="subtitulo-secao">Monitoramento de Pacientes</span>
+                </div>
+
+                <table class="tabela-frequencia">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Frequência (%)</th>
+                            <th>Última Presença</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pacientes">
+                        <!-- Preenchido pelo JS -->
+                        <tr>
+                            <td colspan="4" class="carregando">Carregando pacientes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- PRÓXIMOS HORÁRIOS -->
+            <section class="card-secao">
+                <div class="secao-header">
+                    <h2>🗓️ Próximos Horários</h2>
+                </div>
+                <div id="horarios-lista" class="horarios-lista">
+                    <!-- Preenchido pelo JS -->
+                    <p class="carregando">Carregando horários...</p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- PACIENTES ATUAIS -->
+        <section class="card-secao">
+            <div class="secao-header">
+                <h2>👨‍👩‍👧 Pacientes Atuais</h2>
+            </div>
+            <div id="pacientes-grid" class="pacientes-grid">
+                <!-- Preenchido pelo JS -->
+                <p class="carregando">Carregando pacientes...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="/js/painel-terapeuta.js"></script>
+
+</body>
+</html>

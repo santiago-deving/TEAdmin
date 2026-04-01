@@ -1,0 +1,169 @@
+/* ===== GRID PRINCIPAL ===== */
+.grid-principal {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+/* ===== SEÇÕES ===== */
+.card-secao {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+}
+
+.secao-header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--cinza-claro);
+    padding-bottom: 12px;
+}
+
+.secao-header h2 {
+    font-size: 1.1rem;
+    color: var(--azul);
+}
+
+.subtitulo-secao {
+    font-size: 0.82rem;
+    color: var(--cinza-texto);
+}
+
+/* ===== TABELA ===== */
+.tabela-frequencia {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tabela-frequencia thead {
+    background-color: var(--cinza-claro);
+}
+
+.tabela-frequencia th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--azul);
+    font-size: 0.82rem;
+}
+
+.tabela-frequencia td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    color: var(--cinza-texto);
+}
+
+.tabela-frequencia tr:hover {
+    background-color: #f9f9f9;
+}
+
+.barra-mini-container {
+    background-color: #e0e0e0;
+    border-radius: 50px;
+    height: 10px;
+    width: 100px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.barra-mini {
+    height: 100%;
+    border-radius: 50px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.badge-verde { background-color: #e8f5e9; color: var(--verde); }
+.badge-amarelo { background-color: #fff8e1; color: #f9a825; }
+.badge-vermelho { background-color: #fdecea; color: var(--vermelho); }
+
+/* ===== HORÁRIOS ===== */
+.horarios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.horario-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--cinza-claro);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+}
+
+.horario-hora {
+    font-weight: 700;
+    color: var(--azul);
+}
+
+.btn-agendar {
+    background-color: var(--azul);
+    color: var(--branco);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-agendar:hover {
+    background-color: #1a6a8a;
+}
+
+/* ===== PACIENTES GRID ===== */
+.pacientes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.paciente-card {
+    background-color: var(--cinza-claro);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    font-size: 0.88rem;
+}
+
+.paciente-card .paciente-avatar {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.paciente-card .paciente-nome {
+    font-weight: 700;
+    color: var(--azul);
+}
+
+.paciente-card .paciente-info {
+    color: var(--cinza-texto);
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+/* ===== STATUS ONLINE ===== */
+.status-online {
+    color: var(--verde);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ===== CARREGANDO ===== */
+.carregando {
+    color: var(--cinza-texto);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
+}

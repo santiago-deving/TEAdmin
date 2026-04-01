@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAdm - Login</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+
+    <div class="login-container">
+
+        <!-- Logo -->
+        <div class="logo">
+            <img src="/assets/logo.png" alt="TEAdm Logo">
+            <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
+        </div>
+
+        <!-- Card de login -->
+        <div class="login-card">
+            <h2>Bem-vindo!</h2>
+            <p class="subtitulo">Acesse o sistema de acompanhamento</p>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="••••••••">
+            </div>
+
+            <button class="btn-entrar" onclick="fazerLogin()">Entrar</button>
+        </div>
+
+    </div>
+
+    <script src="/js/login.js"></script>
+
+</body>
+</html>

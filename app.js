@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-<<<<<<< Updated upstream
 const session = require("express-session")
 require("dotenv").config();
  
@@ -26,16 +25,6 @@ app.use(session({
 
 app.get("/", (req,res)=>{
     res.render('inicio');
-=======
-const path = require('path');
-
-const port = process.env.PORT || 3000
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/pages/login.html'));
->>>>>>> Stashed changes
 });
 
 app.get("/pacientes",verificarLogin, async (req,res)=>{
@@ -56,10 +45,5 @@ app.post("/logar",(req,res)=>{
 })
 
 app.listen(port, ()=>{
-<<<<<<< Updated upstream
     console.log(`Express rodando na em: http://0.0.0.0:${port}`);
 });
-=======
-    console.log(`Express rodando na em: http://0.0.0.0:${port}`)
-})
->>>>>>> Stashed changes
