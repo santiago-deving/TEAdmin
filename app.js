@@ -7,8 +7,12 @@ const db = require("./db");
 const verificarLogin = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
+var path = require('path');
+
 app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/public/views');
+
+app.use(express.static(__dirname + '/public'));
 
 app.use(express.json());
 app.use(session({
@@ -26,6 +30,14 @@ app.use(session({
 app.get("/", (req,res)=>{
     res.render('inicio');
 });
+
+app.get("/painel_pais",(req,res)=>{
+    res.render('painel-pais');
+})
+
+app.get("/login", (req,res)=>{
+    res.render('login')
+})
 
 app.get("/pacientes",verificarLogin, async (req,res)=>{
     const client = await db.connect();
