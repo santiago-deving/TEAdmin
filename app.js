@@ -28,6 +28,10 @@ app.use(session({
     }
 }))
 
+/////////////////////////////////////
+///////////// Rotas GET//////////////
+/////////////////////////////////////
+
 app.get("/", (req,res)=>{
     res.render('inicio');
 });
@@ -37,7 +41,11 @@ app.get("/painel_pais",(req,res)=>{
 })
 
 app.get("/login", (req,res)=>{
-    res.render('login')
+    res.render('login');
+})
+
+app.get("/calendario",(req,res)=>{
+    res.render('calendario');
 })
 
 app.get("/pacientes",verificarLogin, async (req,res)=>{
@@ -51,6 +59,10 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
 
     res.json(`Acesso à área de pacientes: ${result.rows}`)
 })
+
+//////////////////////////////////
+///////////Rotas POST/////////////
+//////////////////////////////////
 
 app.post("/logar",(req,res)=>{
     req.session.usuario = "usuario existente";
