@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+app.use(express.static('public'));
 const session = require("express-session")
 require("dotenv").config();
  

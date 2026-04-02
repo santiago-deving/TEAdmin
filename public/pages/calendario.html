@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Agendamento</title>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js'></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          locale: 'pt-br',
+          events: '/api/agendamentos', 
+
+          
+          dateClick: function(info) {
+           
+            var nome = prompt('Nome da criança para o dia ' + info.dateStr + ':');
+
+            if (nome) {
+              
+              calendar.addEvent({
+                title: 'Terapia: ' + nome,
+                start: info.dateStr,
+                color: '#ff5722' 
+              });
+            }
+          },
+         
+
+          eventClick: function(info) {
+            alert('Paciente: ' + info.event.title);
+          }
+        });
+        
+        calendar.render();
+      });
+    </script>
+    
+    <style>
+        #calendar { max-width: 800px; margin: 40px auto; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Minha Agenda de Terapias</h2>
+    <div id='calendar'></div>
+</body>
+</html>
