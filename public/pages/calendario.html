@@ -2,10 +2,48 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Agendamento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Agendamento - TEAdmin</title>
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js'></script>
+    
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0;
+            padding: 20px;
+        }
+
+        #calendar-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            /* Corrigido: box-shadow para dar profundidade */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 { 
+            text-align: center; 
+            color: #1a73e8;
+            margin-bottom: 25px;
+        }
+
+        
+        .fc-event {
+            cursor: pointer;
+            padding: 2px 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="calendar-container">
+        <h2>📅 Agenda de Terapias Infantil</h2>
+        <div id='calendar'></div>
+    </div>
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -13,40 +51,51 @@
         
         var calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: 'dayGridMonth',
-          locale: 'pt-br',
+          locale: 'pt-br', // Calendário em Português
+          
+          // BUSCA (GET): O calendário pede os dados gravados para o Node.js
           events: '/api/agendamentos', 
 
-          
+          // CADASTRO (POST): Quando clica no dia
           dateClick: function(info) {
-           
-            var nome = prompt('Nome da criança para o dia ' + info.dateStr + ':');
+            var nome = prompt('Nome do Paciente para o dia ' + info.dateStr + ':');
 
             if (nome) {
-              
-              calendar.addEvent({
-                title: 'Terapia: ' + nome,
-                start: info.dateStr,
-                color: '#ff5722' 
-              });
+                const novoEvento = {
+                    title: 'Terapia: ' + nome,
+                    start: info.dateStr
+                };
+
+                // Enviando o "pacote" via POST para o app.js 
+                fetch('/api/agendamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(novoEvento)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Só adiciona visualmente se o servidor confirmar que gravou no Postgres
+                        calendar.addEvent(novoEvento); 
+                        alert('Agendamento salvo com sucesso no Banco de Dados!');
+                    } else {
+                        alert('Erro ao salvar. Verifique se você está logado no sistema.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Erro na comunicação:', err);
+                    alert('Falha na conexão com o servidor Node.js.');
+                });
             }
           },
-         
 
+          // CLIQUE NO EVENTO: Só para mostrar quem é o paciente
           eventClick: function(info) {
-            alert('Paciente: ' + info.event.title);
+            alert('Paciente: ' + info.event.title + '\nData: ' + info.event.startStr);
           }
         });
         
         calendar.render();
       });
     </script>
-    
-    <style>
-        #calendar { max-width: 800px; margin: 40px auto; }
-    </style>
-</head>
-<body>
-    <h2 style="text-align: center;">Minha Agenda de Terapias</h2>
-    <div id='calendar'></div>
 </body>
 </html>
