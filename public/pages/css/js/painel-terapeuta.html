@@ -9,6 +9,16 @@
 </head>
 <body>
 
+    <!-- BARRA DE ACESSIBILIDADE -->
+    <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
+        <span>Acessibilidade:</span>
+        <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
+        <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
+        <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">◑ Contraste</button>
+        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de tela</button>
+        <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
+    </div>
+
     <!-- HEADER -->
     <header class="header">
         <div class="header-logo">
@@ -21,25 +31,19 @@
         </div>
     </header>
 
-    <!-- CONTEÚDO -->
     <main class="painel-container">
 
-        <!-- BOAS VINDAS -->
         <div class="boas-vindas">
             <h2>👩‍⚕️ Bem-vindo(a), Dr(a). <span id="nome-boas-vindas">...</span>!</h2>
             <p>Gerencie seus pacientes e agenda pelo painel abaixo</p>
         </div>
 
-        <!-- GRID PRINCIPAL -->
         <div class="grid-principal">
-
-            <!-- ACOMPANHAMENTO DE FREQUÊNCIA -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>📋 Acompanhamento de Frequência</h2>
                     <span class="subtitulo-secao">Monitoramento de Pacientes</span>
                 </div>
-
                 <table class="tabela-frequencia">
                     <thead>
                         <tr>
@@ -50,40 +54,33 @@
                         </tr>
                     </thead>
                     <tbody id="tabela-pacientes">
-                        <!-- Preenchido pelo JS -->
-                        <tr>
-                            <td colspan="4" class="carregando">Carregando pacientes...</td>
-                        </tr>
+                        <tr><td colspan="4" class="carregando">Carregando pacientes...</td></tr>
                     </tbody>
                 </table>
             </section>
 
-            <!-- PRÓXIMOS HORÁRIOS -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>🗓️ Próximos Horários</h2>
                 </div>
                 <div id="horarios-lista" class="horarios-lista">
-                    <!-- Preenchido pelo JS -->
                     <p class="carregando">Carregando horários...</p>
                 </div>
             </section>
-
         </div>
 
-        <!-- PACIENTES ATUAIS -->
         <section class="card-secao">
             <div class="secao-header">
                 <h2>👨‍👩‍👧 Pacientes Atuais</h2>
             </div>
             <div id="pacientes-grid" class="pacientes-grid">
-                <!-- Preenchido pelo JS -->
                 <p class="carregando">Carregando pacientes...</p>
             </div>
         </section>
 
     </main>
 
+    <script src="/js/acessibilidade.js"></script>
     <script src="/js/painel-terapeuta.js"></script>
 
 </body>

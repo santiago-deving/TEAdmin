@@ -8,11 +8,30 @@
 </head>
 <body>
 
+    <!-- BARRA DE ACESSIBILIDADE -->
+    <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
+        <span>Acessibilidade:</span>
+
+        <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
+        <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
+
+        <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">
+            ◑ Contraste
+        </button>
+
+        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">
+            🔊 Leitura de tela
+        </button>
+
+        <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">
+            🤟 Libras
+        </button>
+    </div>
+
     <div class="login-container">
 
         <!-- Logo -->
         <div class="logo">
-            <img src="/assets/logo.png" alt="TEAdm Logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>
 
@@ -23,12 +42,12 @@
 
             <div class="form-group">
                 <label for="email">E-mail</label>
-                <input type="email" id="email" placeholder="seu@email.com">
+                <input type="email" id="email" placeholder="seu@email.com" aria-label="E-mail">
             </div>
 
             <div class="form-group">
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" placeholder="••••••••">
+                <input type="password" id="senha" placeholder="••••••••" aria-label="Senha">
             </div>
 
             <button class="btn-entrar" onclick="fazerLogin()">Entrar</button>
@@ -36,6 +55,7 @@
 
     </div>
 
+    <script src="/js/acessibilidade.js"></script>
     <script src="/js/login.js"></script>
 
 </body>

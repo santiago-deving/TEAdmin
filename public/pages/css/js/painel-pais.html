@@ -9,6 +9,16 @@
 </head>
 <body>
 
+    <!-- BARRA DE ACESSIBILIDADE -->
+    <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
+        <span>Acessibilidade:</span>
+        <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
+        <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
+        <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">◑ Contraste</button>
+        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de tela</button>
+        <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
+    </div>
+
     <!-- HEADER -->
     <header class="header">
         <div class="header-logo">
@@ -20,61 +30,51 @@
         </div>
     </header>
 
-    <!-- PAINEL PRINCIPAL -->
     <main class="painel-container">
 
-        <!-- BOAS VINDAS -->
         <div class="boas-vindas">
             <h2>🎉 Bem-vindo(a), <span id="nome-boas-vindas">...</span>!</h2>
             <p>Acompanhe abaixo o desenvolvimento do seu filho(a)</p>
         </div>
 
-        <!-- CARDS DE ACESSO RÁPIDO -->
         <section class="cards-grid">
-
             <div class="card" onclick="window.location.href='/pages/calendario.html'">
                 <div class="card-icon">📅</div>
                 <h3>Calendário</h3>
                 <p>Dias de Terapia & Horários</p>
             </div>
-
             <div class="card">
                 <div class="card-icon">📊</div>
                 <h3>Estatísticas</h3>
                 <p>Taxa de Presença & Faltas</p>
             </div>
-
             <div class="card">
                 <div class="card-icon">👩‍⚕️</div>
                 <h3>Terapeutas</h3>
                 <p>Terapeutas & Disponíveis</p>
             </div>
-
             <div class="card">
                 <div class="card-icon">🗓️</div>
                 <h3>Data</h3>
                 <p>Próxima Data de Devolutiva</p>
             </div>
-
             <div class="card">
                 <div class="card-icon">📄</div>
                 <h3>Documento</h3>
                 <p>Acesso às Últimas Avaliações</p>
             </div>
-
         </section>
 
-        <!-- FREQUÊNCIA -->
         <section class="frequencia-section">
             <h2>Taxa de Comparecimento</h2>
             <div id="frequencia-lista" class="frequencia-cards">
-                <!-- Preenchido dinamicamente pelo JS -->
                 <p class="carregando">Carregando dados...</p>
             </div>
         </section>
 
     </main>
 
+    <script src="/js/acessibilidade.js"></script>
     <script src="/js/painel-pais.js"></script>
 
 </body>
