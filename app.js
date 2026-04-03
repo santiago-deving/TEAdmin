@@ -33,7 +33,7 @@ app.use(session({
 /////////////////////////////////////
 
 app.get("/", (req,res)=>{
-    res.render('inicio');
+    res.redirect('/login');
 });
 
 app.get("/painel_pais",(req,res)=>{
@@ -64,9 +64,9 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
 ///////////Rotas POST/////////////
 //////////////////////////////////
 
-app.post("/logar",(req,res)=>{
+app.post("/login_send",(req,res)=>{
     req.session.usuario = "usuario existente";
-    res.send("login autorizado!");
+    res.redirect("/pacientes");
 })
 
 app.listen(port, ()=>{
