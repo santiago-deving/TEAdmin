@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+app.use(express.static('public'));
 const session = require("express-session")
 require("dotenv").config();
  
@@ -7,8 +8,12 @@ const db = require("./db");
 const verificarLogin = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
+var path = require('path');
+
 app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/public/views');
+
+app.use(express.static(__dirname + '/public'));
 
 app.use(express.json());
 app.use(session({
@@ -23,9 +28,25 @@ app.use(session({
     }
 }))
 
+/////////////////////////////////////
+///////////// Rotas GET//////////////
+/////////////////////////////////////
+
 app.get("/", (req,res)=>{
-    res.render('inicio');
+    res.redirect('/login');
 });
+
+app.get("/painel_pais",(req,res)=>{
+    res.render('painel-pais');
+})
+
+app.get("/login", (req,res)=>{
+    res.render('login');
+})
+
+app.get("/calendario",(req,res)=>{
+    res.render('calendario');
+})
 
 app.get("/pacientes",verificarLogin, async (req,res)=>{
     const client = await db.connect();
@@ -39,9 +60,13 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
     res.json(`Acesso à área de pacientes: ${result.rows}`)
 })
 
-app.post("/logar",(req,res)=>{
+//////////////////////////////////
+///////////Rotas POST/////////////
+//////////////////////////////////
+
+app.post("/login_send",(req,res)=>{
     req.session.usuario = "usuario existente";
-    res.send("login autorizado!");
+    res.redirect("/pacientes");
 })
 
 app.listen(port, ()=>{

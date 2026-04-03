@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEAdm - Login</title>
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/global.css"/>
 </head>
 <body>
 
@@ -40,6 +40,7 @@
             <h2>Bem-vindo!</h2>
             <p class="subtitulo">Acesse o sistema de acompanhamento</p>
 
+<<<<<<< HEAD
             <div class="form-group">
                 <label for="email">E-mail</label>
                 <input type="email" id="email" placeholder="seu@email.com" aria-label="E-mail">
@@ -49,8 +50,21 @@
                 <label for="senha">Senha</label>
                 <input type="password" id="senha" placeholder="••••••••" aria-label="Senha">
             </div>
+=======
+            <form action="/login_send" method="post">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="seu@email.com">
+                </div>
 
-            <button class="btn-entrar" onclick="fazerLogin()">Entrar</button>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" placeholder="••••••••">
+                </div>
+>>>>>>> 9a3c25ccdd44da80f711b4433b12a1d323f022bd
+
+                <button type="submit" class="btn-entrar">Entrar</button>
+            </form>    
         </div>
 
     </div>

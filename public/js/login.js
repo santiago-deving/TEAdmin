@@ -9,11 +9,11 @@ function fazerLogin() {
 
     // Por enquanto redireciona conforme o e-mail
     // Futuramente virá do backend
-    if (email.includes('admin')) {
-        window.location.href = '/pages/painel-admin.html';
-    } else if (email.includes('terapeuta')) {
-        window.location.href = '/pages/painel-terapeuta.html';
-    } else {
-        window.location.href = '/pages/painel-pais.html';
-    }
+//     if (email.includes('admin')) {
+//         window.location.href = '/pages/painel-admin.html';
+//     } else if (email.includes('terapeuta')) {
+//         window.location.href = '/pages/painel-terapeuta.html';
+//     } else {
+//         window.location.href = '/pages/painel-pais.html';
+//     }
 }
