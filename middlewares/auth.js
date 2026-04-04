@@ -5,4 +5,12 @@ function verificarLogin(req, res, next) {
   return res.redirect("/login");
 }
 
-module.exports = verificarLogin;
+async function validac_login(req, res, next) {
+  let email = req.body.email;
+  let senha = req.body.senha;
+
+  console.log(JSON.stringify(req.body));
+  return next();
+}
+
+module.exports = { verificarLogin, validac_login };

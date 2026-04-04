@@ -5,7 +5,7 @@ const session = require("express-session")
 require("dotenv").config();
  
 const db = require("./db");
-const verificarLogin = require("./middlewares/auth");
+const { verificarLogin, validac_login } = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
 var path = require('path');
@@ -13,6 +13,8 @@ var path = require('path');
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(__dirname + '/public'));
 
 app.use(express.json());
@@ -52,19 +54,22 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
     const client = await db.connect();
 
     const result = await client.query('SELECT * FROM pacientes');
+    
 
-    console.log(result);
+    console.log(result.rows);
 
     client.release();
 
-    res.json(`Acesso à área de pacientes: ${result.rows}`)
+    res.json(`Acesso à área de pacientes: ${JSON.stringify(result.rows)}`)
 })
 
 //////////////////////////////////
 ///////////Rotas POST/////////////
 //////////////////////////////////
 
-app.post("/login_send",(req,res)=>{
+app.post("/login_send", validac_login, async (req,res)=>{
+    
+    console.log(JSON.stringify(req.body));
     req.session.usuario = "usuario existente";
     res.redirect("/pacientes");
 })
