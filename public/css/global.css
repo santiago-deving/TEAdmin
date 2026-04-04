@@ -13,13 +13,103 @@
     --cinza-claro: #F5F7FA;
     --cinza-texto: #555;
     --branco: #ffffff;
+    --preto: #000000;
     --sombra: 0 4px 15px rgba(0,0,0,0.1);
+    --fonte-base: 16px;
 }
 
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: var(--cinza-claro);
     color: var(--cinza-texto);
+    font-size: var(--fonte-base);
+}
+
+/* ===== ALTO CONTRASTE ===== */
+body.alto-contraste {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+body.alto-contraste .header {
+    background-color: #000 !important;
+    border-bottom: 2px solid #fff !important;
+}
+
+body.alto-contraste .login-card,
+body.alto-contraste .boas-vindas,
+body.alto-contraste .card,
+body.alto-contraste .frequencia-section,
+body.alto-contraste .card-secao,
+body.alto-contraste .mini-card {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+
+body.alto-contraste .form-group input {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+
+body.alto-contraste h2,
+body.alto-contraste h3,
+body.alto-contraste p,
+body.alto-contraste label,
+body.alto-contraste span,
+body.alto-contraste td,
+body.alto-contraste th {
+    color: #fff !important;
+}
+
+body.alto-contraste .btn-entrar,
+body.alto-contraste .btn-agendar {
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+}
+
+/* ===== BARRA DE ACESSIBILIDADE ===== */
+.barra-acessibilidade {
+    background-color: #1a1a2e;
+    color: #fff;
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.barra-acessibilidade span {
+    font-size: 0.78rem;
+    color: #ccc;
+    margin-right: 4px;
+}
+
+.btn-acess {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s, border 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-acess:hover {
+    background-color: #333;
+    border-color: #fff;
+}
+
+.btn-acess.ativo {
+    background-color: var(--azul);
+    border-color: var(--azul);
 }
 
 /* ===== LOGIN ===== */
@@ -28,7 +118,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 90vh;
     gap: 24px;
 }
 
@@ -38,22 +128,13 @@ body {
     gap: 12px;
 }
 
-.logo img {
-    width: 60px;
-}
-
 .logo h1 {
     font-size: 2.5rem;
     font-weight: 800;
 }
 
-.logo .te {
-    color: var(--vermelho);
-}
-
-.logo .adm {
-    color: var(--azul);
-}
+.logo .te { color: var(--vermelho); }
+.logo .adm { color: var(--preto); }
 
 .login-card {
     background: var(--branco);
@@ -117,4 +198,149 @@ body {
 
 .btn-entrar:hover {
     background-color: #1a6a8a;
+}
+
+/* ===== HEADER ===== */
+.header {
+    background-color: var(--azul);
+    color: var(--branco);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--sombra);
+}
+
+.header-logo h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.95rem;
+}
+
+.btn-sair {
+    background-color: var(--vermelho);
+    color: var(--branco);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-sair:hover {
+    background-color: #c0392b;
+}
+
+/* ===== PAINEL ===== */
+.painel-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* ===== BOAS VINDAS ===== */
+.boas-vindas {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: var(--sombra);
+    border-left: 6px solid var(--verde);
+}
+
+.boas-vindas h2 {
+    font-size: 1.4rem;
+    color: var(--azul);
+}
+
+.boas-vindas p {
+    margin-top: 6px;
+    color: var(--cinza-texto);
+}
+
+/* ===== CARDS ===== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.card h3 { font-size: 1rem; color: var(--azul); font-weight: 700; }
+.card p { font-size: 0.82rem; color: var(--cinza-texto); margin-top: 6px; }
+
+/* ===== FREQUÊNCIA ===== */
+.frequencia-section {
+    background-color: var(--branco);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: var(--sombra);
+}
+
+.frequencia-section h2 {
+    font-size: 1.2rem;
+    color: var(--azul);
+    margin-bottom: 20px;
+}
+
+.frequencia-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.terapeuta-nome {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cinza-texto);
+}
+
+.barra-container {
+    background-color: #e0e0e0;
+    border-radius: 50px;
+    overflow: hidden;
+    height: 36px;
+}
+
+.barra {
+    height: 100%;
+    border-radius: 50px;
+    color: var(--branco);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    font-size: 0.9rem;
+    transition: width 0.6s ease;
+}
+
+/* ===== CARREGANDO ===== */
+.carregando {
+    color: var(--cinza-texto);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
 }
