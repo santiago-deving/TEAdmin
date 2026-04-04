@@ -1,86 +1,4 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEAdm - Calendário</title>
-    <link rel="stylesheet" href="/css/global.css">
-    <link rel="stylesheet" href="/css/calendario.css">
-</head>
-<body>
-
-    <!-- BARRA DE ACESSIBILIDADE -->
-    <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
-        <span>Acessibilidade:</span>
-        <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
-        <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
-        <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">◑ Contraste</button>
-        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de tela</button>
-        <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
-    </div>
-
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header-logo">
-            <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
-        </div>
-        <div class="header-info">
-            <a href="/pages/painel-pais.html" class="btn-voltar">← Voltar</a>
-            <a href="/pages/login.html" class="btn-sair">Sair</a>
-        </div>
-    </header>
-
-    <main class="painel-container">
-
-        <div class="boas-vindas">
-            <h2>📅 Calendário de Terapias</h2>
-            <p>Acompanhe os dias e horários das sessões</p>
-        </div>
-
-        <div class="calendario-wrapper">
-
-            <!-- CALENDÁRIO -->
-            <section class="card-secao calendario-secao">
-                <div class="cal-header">
-                    <button class="btn-nav" onclick="mudarMes(-1)" aria-label="Mês anterior">&#8249;</button>
-                    <h2 id="mes-ano">...</h2>
-                    <button class="btn-nav" onclick="mudarMes(1)" aria-label="Próximo mês">&#8250;</button>
-                </div>
-
-                <div class="cal-grid-header">
-                    <span>Dom</span><span>Seg</span><span>Ter</span>
-                    <span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
-                </div>
-
-                <div class="cal-grid" id="cal-grid"></div>
-
-                <div class="cal-legenda">
-                    <span class="leg-item leg-sessao">Sessão agendada</span>
-                    <span class="leg-item leg-hoje">Hoje</span>
-                    <span class="leg-item leg-concluido">Concluído</span>
-                </div>
-            </section>
-
-            <!-- AGENDA DO DIA -->
-            <section class="card-secao agenda-secao">
-                <div class="secao-header">
-                    <h2>📋 Agenda do dia</h2>
-                    <span id="data-selecionada" class="data-badge">...</span>
-                </div>
-                <div id="agenda-dia" class="agenda-dia">
-                    <p class="carregando">Selecione um dia no calendário.</p>
-                </div>
-            </section>
-
-        </div>
-
-    </main>
-
-    <script src="/js/acessibilidade.js"></script>
-    <script src="/js/calendario.js"></script>
-
-=======
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -179,6 +97,5 @@
         calendar.render();
       });
     </script>
->>>>>>> 9a3c25ccdd44da80f711b4433b12a1d323f022bd
 </body>
 </html>
