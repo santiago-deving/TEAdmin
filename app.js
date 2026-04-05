@@ -46,6 +46,18 @@ app.get("/login", (req,res)=>{
     res.render('login');
 })
 
+app.get("/painel_admin", (req,res)=>{
+    res.render('painel-admin')
+})
+
+app.get('/painel_pais', (req, res) => {
+  res.send('painel-pais')
+})
+
+app.get('/painel_terapeutas', (req, res) => {
+  res.send('painel-pais')
+})
+
 app.get("/calendario",(req,res)=>{
     res.render('calendario');
 })
@@ -68,8 +80,6 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
 //////////////////////////////////
 
 app.post("/login_send", validac_login, async (req,res)=>{
-    
-    console.log(JSON.stringify(req.body));
     req.session.usuario = "usuario existente";
     res.redirect("/pacientes");
 })

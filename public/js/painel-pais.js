@@ -1,5 +1,27 @@
 // Futuramente esses dados virão do backend após autenticação
 // Por enquanto simulei o que a API retornará
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebarBtn = document.getElementById("menu_btn");
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const closeBtn = document.getElementById('closeBtn');
+
+sidebarBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('ativo');
+    overlay.classList.toggle('ativo');
+});
+
+overlay.addEventListener('click', ()=>{
+    sidebar.classList.toggle('ativo');
+    overlay.classList.toggle('ativo');
+})
+
+closeBtn.addEventListener('click', ()=>{
+    console.log('clicked');
+    sidebar.classList.toggle('ativo');
+    overlay.classList.toggle('ativo');
+})
 
 const dadosUsuario = {
     nome: "Usuário",         // virá do backend
@@ -32,3 +54,4 @@ if (dadosUsuario.terapeutas.length === 0) {
         </div>
     `).join('');
 }
+})

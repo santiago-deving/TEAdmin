@@ -6,8 +6,10 @@
     <title>TEAdm - Painel da Família</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/painel-pais.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
+    <div class="overlay" id="overlay"></div>
 
     <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
@@ -21,16 +23,36 @@
 
     <!-- HEADER -->
     <header class="header">
+        <div class="menu_btn" id="menu_btn">
+            <i class="bi bi-list"></i>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="closeBtn" id="closeBtn">
+                <i class="bi bi-x"></i>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Inicio</a></i>
+                    <li><a href="/painel_pais">Painel</a></i>
+                    <li><a href="/calendario">Calendario</a></i>
+                    <li><a href="#">Dados</a></i>
+                </ul>
+            </nav>
+        </div>
+        
         <div class="header-logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>
         <div class="header-info">
-            <span>👤 Olá, <span id="nome-usuario">...</span></span>
-            <a href="/pages/login.html" class="btn-sair">Sair</a>
+            <span>👤 Olá, <span id="nome-usuario"><i class="bi bi-list"></i>...</span></span>
+            <a href="/login" class="btn-sair">Sair</a>
         </div>
     </header>
 
     <main class="painel-container">
+        
+        
 
         <div class="boas-vindas">
             <h2>🎉 Bem-vindo(a), <span id="nome-boas-vindas">...</span>!</h2>
@@ -38,7 +60,7 @@
         </div>
 
         <section class="cards-grid">
-            <div class="card" onclick="window.location.href='/pages/calendario.html'">
+            <div class="card" onclick="window.location.href='/calendario'">
                 <div class="card-icon">📅</div>
                 <h3>Calendário</h3>
                 <p>Dias de Terapia & Horários</p>
