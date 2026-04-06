@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-app.use(express.static('public'));
 const session = require("express-session")
 require("dotenv").config();
  
@@ -13,6 +12,7 @@ var path = require('path');
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
 
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
@@ -34,8 +34,8 @@ app.use(session({
 ///////////// Rotas GET//////////////
 /////////////////////////////////////
 
-app.get("/", (req,res)=>{
-    res.redirect('/login');
+app.get("/", verificarLogin, (req,res)=>{
+    res.redirect('/painel_pais');
 });
 
 app.get("/painel_pais",(req,res)=>{
@@ -51,11 +51,11 @@ app.get("/painel_admin", (req,res)=>{
 })
 
 app.get('/painel_pais', (req, res) => {
-  res.send('painel-pais')
+  res.render('painel-pais')
 })
 
 app.get('/painel_terapeutas', (req, res) => {
-  res.send('painel-pais')
+  res.render('painel-terapeuta')
 })
 
 app.get("/calendario",(req,res)=>{
@@ -66,7 +66,6 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
     const client = await db.connect();
 
     const result = await client.query('SELECT * FROM pacientes');
-    
 
     console.log(result.rows);
 
@@ -81,7 +80,7 @@ app.get("/pacientes",verificarLogin, async (req,res)=>{
 
 app.post("/login_send", validac_login, async (req,res)=>{
     req.session.usuario = "usuario existente";
-    res.redirect("/pacientes");
+    res.redirect("/");
 })
 
 app.listen(port, ()=>{
