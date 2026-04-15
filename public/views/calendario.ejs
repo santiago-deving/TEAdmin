@@ -1,101 +1,185 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Agendamento - TEAdmin</title>
+    <title>TEAdm - Calendário</title>
+
+    <link rel="stylesheet" href="/css/global.css"/>
+    <link rel="stylesheet" href="/css/calendario.css"/>
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    
+
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f0f2f5; 
-            margin: 0;
-            padding: 20px;
+        .fc {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.9rem;
         }
 
-        #calendar-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .fc-toolbar-title {
+            font-size: 1.1rem !important;
+            color: var(--azul) !important;
+            font-weight: 700 !important;
+            text-transform: capitalize;
         }
 
-        h2 { 
-            text-align: center; 
-            color: #1a73e8;
-            margin-bottom: 25px;
+        .fc-button {
+            background-color: var(--cinza-claro) !important;
+            border: none !important;
+            color: var(--azul) !important;
+            border-radius: 8px !important;
+            font-size: 1rem !important;
+            padding: 4px 12px !important;
+            transition: background 0.2s !important;
         }
 
-        
+        .fc-button:hover {
+            background-color: #dde !important;
+        }
+
+        .fc-button-active {
+            background-color: var(--azul) !important;
+            color: #fff !important;
+        }
+
+        .fc-daygrid-day-number {
+            color: var(--cinza-texto);
+        }
+
+        .fc-col-header-cell-cushion {
+            color: var(--azul);
+            font-weight: 700;
+            font-size: 0.78rem;
+        }
+
         .fc-event {
+            background-color: var(--azul) !important;
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 2px 6px !important;
             cursor: pointer;
-            padding: 2px 5px;
+        }
+
+        .fc-event-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .fc-day-today {
+            background-color: rgba(46, 134, 171, 0.08) !important;
+        }
+
+        .painel-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 24px;
         }
     </style>
 </head>
 <body>
 
-    <div id="calendar-container">
-        <h2>📅 Agenda de Terapias Infantil</h2>
-        <div id='calendar'></div>
+    <!-- BARRA DE ACESSIBILIDADE -->
+    <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
+        <span>Acessibilidade:</span>
+        <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
+        <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
+        <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">◑ Contraste</button>
+        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de tela</button>
+        <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
     </div>
 
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-logo">
+            <h1><span class="te">TE</span><span style="color:#fff">Adm</span></h1>
+        </div>
+        <div class="header-info">
+            <span>Calendário de Consultas</span>
+            <a href="/painel_admin" class="btn-voltar">← Voltar</a>
+            <a href="/logout" class="btn-sair">Sair</a>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div class="painel-container">
+        <div class="card-secao">
+            <div class="secao-header">
+                <h2>📅 Agenda de Terapias</h2>
+                <span class="data-badge" id="data-hoje"></span>
+            </div>
+
+            <div id='calendar'></div>
+
+            <!-- LEGENDA -->
+            <div class="cal-legenda">
+                <div class="leg-item leg-sessao">Consulta agendada</div>
+                <div class="leg-item leg-hoje">Hoje</div>
+                <div class="leg-item leg-concluido">Concluída</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/acessibilidade.js"></script>
+
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          locale: 'pt-br', // Calendário em Português
-          
-          // BUSCA (GET): O calendário pede os dados gravados para o Node.js
-          events: '/api/agendamentos', 
+        // Mostra a data de hoje no badge
+        const hoje = new Date();
+        document.getElementById('data-hoje').textContent =
+            hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
-          // CADASTRO (POST): Quando clica no dia
-          dateClick: function(info) {
-            var nome = prompt('Nome do Paciente para o dia ' + info.dateStr + ':');
+        // Calendário
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
 
-            if (nome) {
-                const novoEvento = {
-                    title: 'Terapia: ' + nome,
-                    start: info.dateStr
-                };
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
 
-                // Enviando o "pacote" via POST para o app.js 
-                fetch('/api/agendamentos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(novoEvento)
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Só adiciona visualmente se o servidor confirmar que gravou no Postgres
-                        calendar.addEvent(novoEvento); 
-                        alert('Agendamento salvo com sucesso no Banco de Dados!');
-                    } else {
-                        alert('Erro ao salvar. Verifique se você está logado no sistema.');
+                // GET — busca consultas do banco
+                events: '/api/agendamentos',
+
+                // Clique no dia
+                dateClick: function (info) {
+                    var nome = prompt('Nome do Paciente para o dia ' + info.dateStr + ':');
+                    if (nome) {
+                        const novoEvento = {
+                            title: 'Terapia: ' + nome,
+                            start: info.dateStr
+                        };
+                        fetch('/api/agendamentos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(novoEvento)
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                calendar.addEvent(novoEvento);
+                                alert('Agendamento salvo com sucesso!');
+                            } else {
+                                alert('Erro ao salvar. Verifique se você está logado.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erro:', err);
+                            alert('Falha na conexão com o servidor.');
+                        });
                     }
-                })
-                .catch(err => {
-                    console.error('Erro na comunicação:', err);
-                    alert('Falha na conexão com o servidor Node.js.');
-                });
-            }
-          },
+                },
 
-          // CLIQUE NO EVENTO: Só para mostrar quem é o paciente
-          eventClick: function(info) {
-            alert('Paciente: ' + info.event.title + '\nData: ' + info.event.startStr);
-          }
+                // Clique no evento
+                eventClick: function (info) {
+                    alert('Paciente: ' + info.event.title + '\nData: ' + info.event.startStr);
+                }
+            });
+
+            calendar.render();
         });
-        
-        calendar.render();
-      });
     </script>
+
 </body>
 </html>
