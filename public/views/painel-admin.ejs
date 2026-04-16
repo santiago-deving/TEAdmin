@@ -140,5 +140,27 @@
     <script src="/js/acessibilidade.js"></script>
     <script src="/js/painel-admin.js"></script>
 
+    <script>
+    const menuBtn = document.getElementById('menu_btn');
+    const sidebar = document.getElementById('sidebar');
+    const closeBtn = document.getElementById('closeBtn');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+        sidebar.classList.add('aberto');
+        overlay.classList.add('ativo');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.remove('aberto');
+        overlay.classList.remove('ativo');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('aberto');
+        overlay.classList.remove('ativo');
+    });
+</script>
+
 </body>
 </html>
