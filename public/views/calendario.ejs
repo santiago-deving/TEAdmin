@@ -48,6 +48,10 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+
+        function fetchConsulta(input_nomepaciente){
+            fetch("/consulta_por_paciente")
+        }
         
         var calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: 'dayGridMonth',

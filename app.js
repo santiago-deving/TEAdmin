@@ -8,6 +8,7 @@ const { verificarLogin, validac_login } = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
 var path = require('path');
+const e = require('express');
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
@@ -63,15 +64,33 @@ app.get("/calendario",(req,res)=>{
 })
 
 app.get("/pacientes",verificarLogin, async (req,res)=>{
-    const client = await db.connect();
+    try {
+        const client = await db.connect();
 
-    const result = await client.query('SELECT * FROM pacientes');
+        const result = await client.query('SELECT * FROM pacientes');
 
-    console.log(result.rows);
+        console.log(result.rows);
 
-    client.release();
+        client.release();
 
-    res.json(`Acesso à área de pacientes: ${JSON.stringify(result.rows)}`)
+        res.json(`Acesso à área de pacientes: ${JSON.stringify(result.rows)}`)
+    } catch (e) {
+        console.log(e)
+    }
+    
+})
+
+app.get("/listar_pacientes", async(req,res)=>{
+    try {
+        const client = await db.connect();
+        let pac = req.query.id_pac
+        console.log(pac)
+        let [result] = await client.query(`SELECT * FROM pacientes WHERE id_paciente = ${pac}`);
+        console.log(result);
+        res.send(result);
+    } catch (e){
+        res.send(e);
+    }
 })
 
 //////////////////////////////////
@@ -84,5 +103,5 @@ app.post("/login_send", validac_login, async (req,res)=>{
 })
 
 app.listen(port, ()=>{
-    console.log(`Express rodando na em: http://0.0.0.0:${port}`);
+    console.log(`Express rodando na em: http://localhost:${port}`);
 });
