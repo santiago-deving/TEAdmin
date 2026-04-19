@@ -1,6 +1,7 @@
 referencias/
 node_modules/
 *.yaml
-database/
+database/LEIA-ME IMPORTANTE.txt
+database/TEAdmin diagrama.pdf
 *.rest
 *.env
