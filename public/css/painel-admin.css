@@ -278,3 +278,67 @@
 .btn-agendar-pac:hover {
     background-color: #1a6a8a;
 }
+
+/* ===== SIDEBAR / MENU ===== */
+.menu_btn {
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--branco);
+    display: flex;
+    align-items: center;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #1a1a2e;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    padding: 24px 16px;
+}
+
+.sidebar.aberto {
+    left: 0;
+}
+
+.sidebar nav ul {
+    list-style: none;
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.sidebar nav ul li a:hover {
+    color: var(--azul);
+}
+
+.closeBtn {
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+    text-align: right;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+}
+
+.overlay.ativo {
+    display: block;
+}
