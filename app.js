@@ -8,7 +8,6 @@ const db = require("./db");
 const { verificarLogin, validac_login } = require("./middlewares/auth");
 const port = process.env.PORT || 3000 ;
 
-var path = require('path');
 const e = require('express');
 
 app.set('view engine', 'ejs');
@@ -31,8 +30,8 @@ app.use(session({
     }
 }));
 
-app.get("/", (req, res) => {
-    res.redirect('/login');
+app.get("/", verificarLogin,(req, res) => {
+    res.redirect('/painel_admin');
 });
 
 app.get("/login", (req, res) => {
@@ -89,7 +88,7 @@ app.get("/listar_pacientes", async(req,res)=>{
 
 app.post("/login_send", validac_login, async (req, res) => {
     req.session.usuario = "usuario existente";
-    res.redirect("/pacientes");
+    res.redirect("/");
 });
 
 app.listen(port, ()=>{
