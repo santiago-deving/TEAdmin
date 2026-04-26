@@ -30,6 +30,10 @@ app.use(session({
     }
 }));
 
+///////////////////////////////////////////
+/////////////// ROTAS GET ///////////////// 
+///////////////////////////////////////////
+
 app.get("/", verificarLogin,(req, res) => {
     res.redirect('/painel_admin');
 });
@@ -81,15 +85,23 @@ app.get("/listar_pacientes", async(req,res)=>{
         let [result] = await client.query(`SELECT * FROM pacientes WHERE id_paciente = ${pac}`);
         console.log(result);
         res.send(result);
+        client.release();
     } catch (e){
         res.send(e);
     }
 });
 
+///////////////////////////////////////////
+/////////////// ROTAS POST //////////////// 
+///////////////////////////////////////////
+
 app.post("/login_send", validac_login, async (req, res) => {
-    req.session.usuario = "usuario existente";
     res.redirect("/");
 });
+
+app.post('/api/agendamentos', async (req, res) => {
+  res.send('Sucesso!');
+})
 
 app.listen(port, ()=>{
     console.log(`Express rodando na em: http://localhost:${port}`);
