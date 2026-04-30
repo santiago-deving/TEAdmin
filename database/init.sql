@@ -45,7 +45,7 @@ CREATE TABLE paciente_responsavel (
     FOREIGN KEY (id_responsavel) REFERENCES responsavel(id_responsavel)
 );
 
--- 🔥 REGRA: apenas 1 responsável principal por paciente
+-- apenas 1 responsável principal por paciente
 CREATE UNIQUE INDEX uk_responsavel_principal
 ON paciente_responsavel(id_paciente)
 WHERE responsavel_principal = true;
@@ -266,4 +266,73 @@ CREATE TABLE telefone_responsavel (
     tipo tipo_telefone_enum NOT NULL,
     UNIQUE (id_responsavel, telefone),
     FOREIGN KEY (id_responsavel) REFERENCES responsavel(id_responsavel)
+);
+
+-- USUÁRIOS (LOGIN / ACESSO)
+
+CREATE TABLE usuario (
+    id_usuario BIGSERIAL PRIMARY KEY,
+    
+    login VARCHAR(50) NOT NULL UNIQUE,
+    senha_hash VARCHAR(255) NOT NULL,
+
+    id_profissional BIGINT,
+    id_recepcionista BIGINT,
+    id_responsavel BIGINT,
+
+    tipo_usuario VARCHAR(20) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+
+    -- FOREIGN KEYS
+
+    CONSTRAINT fk_usuario_profissional
+        FOREIGN KEY (id_profissional)
+        REFERENCES profissional(id_profissional),
+
+    CONSTRAINT fk_usuario_recepcionista
+        FOREIGN KEY (id_recepcionista)
+        REFERENCES recepcionista(id_recepcionista),
+
+    CONSTRAINT fk_usuario_responsavel
+        FOREIGN KEY (id_responsavel)
+        REFERENCES responsavel(id_responsavel),
+
+    -- VALIDA TIPOS PERMITIDOS
+
+    CONSTRAINT chk_tipo_usuario
+    CHECK (
+        tipo_usuario IN ('profissional','recepcionista','responsavel','admin')
+    ),
+
+    -- REGRA PRINCIPAL:
+    -- 1 vínculo OU nenhum (admin)
+
+    CONSTRAINT chk_vinculo_usuario
+    CHECK (
+        (
+            (id_profissional IS NOT NULL)::int +
+            (id_recepcionista IS NOT NULL)::int +
+            (id_responsavel IS NOT NULL)::int
+        ) = 1
+        OR
+        (
+            tipo_usuario = 'admin' AND
+            id_profissional IS NULL AND
+            id_recepcionista IS NULL AND
+            id_responsavel IS NULL
+        )
+    ),
+
+    -- GARANTE COERÊNCIA ENTRE TIPO E VÍNCULO
+
+    CONSTRAINT chk_tipo_vs_vinculo
+    CHECK (
+        (tipo_usuario = 'profissional' AND id_profissional IS NOT NULL AND id_recepcionista IS NULL AND id_responsavel IS NULL)
+        OR
+        (tipo_usuario = 'recepcionista' AND id_recepcionista IS NOT NULL AND id_profissional IS NULL AND id_responsavel IS NULL)
+        OR
+        (tipo_usuario = 'responsavel' AND id_responsavel IS NOT NULL AND id_profissional IS NULL AND id_recepcionista IS NULL)
+        OR
+        (tipo_usuario = 'admin' AND id_profissional IS NULL AND id_recepcionista IS NULL AND id_responsavel IS NULL)
+    )
 );

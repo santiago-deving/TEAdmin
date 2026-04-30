@@ -35,7 +35,7 @@ app.use(session({
 ///////////////////////////////////////////
 
 app.get("/", verificarLogin,(req, res) => {
-    res.redirect('/painel_admin');
+    res.redirect('/painel_terapeutas');
 });
 
 app.get("/login", (req, res) => {
@@ -51,7 +51,7 @@ app.get("/painel_pais", (req, res) => {
 });
 
 app.get('/painel_terapeutas', (req, res) => {
-    res.render('painel-terapeutas');
+    res.render('painel-terapeuta', {user: req.session.usuario});
 });
 
 app.get("/calendario", (req, res) => {
@@ -90,6 +90,10 @@ app.get("/listar_pacientes", async(req,res)=>{
         res.send(e);
     }
 });
+
+app.get('/send_user', verificarLogin, (req, res) => {
+  res.send(req.session.usuario);
+})
 
 ///////////////////////////////////////////
 /////////////// ROTAS POST //////////////// 

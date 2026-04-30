@@ -16,27 +16,24 @@ async function validac_login(req, res, next) {
   try {
     let user
     
-    user = await client.query('SELECT * FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
+    user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
 
     if (user.rows.length === 0) {
-      console.log('n responsavel');
-      user = await client.query('SELECT * FROM teadmin.profissional WHERE email = $1 AND senha = $2', [email, senha]);
+      user = await client.query('SELECT *, 1 AS tipo FROM teadmin.profissional WHERE email = $1 AND senha = $2', [email, senha]);
     }
 
     if (user.rows.length === 0) {
-      console.log('n profissional');
-      user = await client.query('SELECT * FROM teadmin.adm WHERE email = $1 AND senha = $2', [email, senha]);
+      user = await client.query('SELECT *, 2 AS tipo FROM teadmin.adm WHERE email = $1 AND senha = $2', [email, senha]);
     }
 
     if (user.rows.length === 0) {
-      console.log('n sei n man');
+      return next();
     }
 
     user = user.rows[0];
 
-    console.log(user);
-    
     req.session.usuario = user;  // salva o usuario no cookie
+
     return next();
   } catch (e) {
     res.send(`Erro: ${e}`);

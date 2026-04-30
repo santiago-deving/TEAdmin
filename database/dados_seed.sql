@@ -189,3 +189,31 @@ INSERT INTO telefone_responsavel (id_responsavel, telefone, tipo) VALUES
 -- Responsável 6
 (6, '11990001111', 'celular'),
 (6, '1144556677', 'comercial');
+
+-- =========================
+-- USUARIOS
+-- =========================
+-- senha fictícia (exemplo bcrypt): $2b$10$abcdefghijklmnopqrstuv
+
+INSERT INTO usuario 
+(login, senha_hash, tipo_usuario, id_profissional, id_recepcionista, id_responsavel)
+VALUES
+-- ADMIN (sem vínculo)
+('admin', 'admin', 'admin', NULL, NULL, NULL),
+
+-- PROFISSIONAIS (IDs 1 a 4)
+('prof_joao',   'senha123', 'profissional', 1, NULL, NULL),
+('prof_paula',  'senha456', 'profissional', 2, NULL, NULL),
+('prof_carlos', 'senha789', 'profissional', 3, NULL, NULL),
+('prof_luciana','senha101', 'profissional', 4, NULL, NULL),
+
+-- RECEPCIONISTAS (IDs 1 e 2)
+('recep_bruna',  '$2b$10$abcdefghijklmnopqrstuv', 'recepcionista', NULL, 1, NULL),
+('recep_rafael', '$2b$10$abcdefghijklmnopqrstuv', 'recepcionista', NULL, 2, NULL),
+
+-- RESPONSÁVEIS (IDs 1 a 5)
+('resp_carlos',   '$2b$10$abcdefghijklmnopqrstuv', 'responsavel', NULL, NULL, 1),
+('resp_juliana',  '$2b$10$abcdefghijklmnopqrstuv', 'responsavel', NULL, NULL, 2),
+('resp_roberto',  '$2b$10$abcdefghijklmnopqrstuv', 'responsavel', NULL, NULL, 3),
+('resp_fernanda', '$2b$10$abcdefghijklmnopqrstuv', 'responsavel', NULL, NULL, 4),
+('resp_paulo',    '$2b$10$abcdefghijklmnopqrstuv', 'responsavel', NULL, NULL, 5);
