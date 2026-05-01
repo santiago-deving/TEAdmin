@@ -1,8 +1,8 @@
 // Futuramente esses dados virão do backend após autenticação
 
-async function terapeutaData() {
+async function terapeutaData(route) {
     try {
-        const response = await fetch('/send_user');
+        const response = await fetch(route);
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         } 
@@ -15,17 +15,33 @@ async function terapeutaData() {
 }
 
 async function init() {
-    const dadosTerapeuta = await terapeutaData(); // aguarda a Promise resolver
-    console.log(dadosTerapeuta); // agora é o objeto de verdade
+    const dadosTerapeuta = await terapeutaData('send_user');
+    const consultasTerapeuta = await terapeutaData('send_horarios');
+
+    console.log(dadosTerapeuta);
+    console.log(consultasTerapeuta);
 
     document.getElementById('nome-terapeuta').textContent = dadosTerapeuta.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosTerapeuta.nome;
+
+    // Preenche horários
+    const horarios = document.getElementById('horarios-lista');
+    if (consultasTerapeuta.length === 0) {
+        horarios.innerHTML = '<p class="carregando">Nenhum horário disponível.</p>';
+    } else {
+        horarios.innerHTML = consultasTerapeuta.map(h => `
+            <div class="horario-item">
+                <span class="horario-hora">${h.hora}</span>
+                <button class="btn-agendar">+ Agendar</button>
+            </div>
+        `).join('');
+    }
 }
 
 init();
 
 // Preenche tabela de pacientes
-// const tabela = document.getElementById('tabela-pacientes');
+// const tabela     = document.getElementById('tabela-pacientes');
 // if (dadosTerapeuta.pacientes.length === 0) {
 //     tabela.innerHTML = '<tr><td colspan="4" class="carregando">Nenhum paciente cadastrado ainda.</td></tr>';
 // } else {
@@ -48,18 +64,6 @@ init();
 //     }).join('');
 // }
 
-// Preenche horários
-// const horarios = document.getElementById('horarios-lista');
-// if (dadosTerapeuta.horarios.length === 0) {
-//     horarios.innerHTML = '<p class="carregando">Nenhum horário disponível.</p>';
-// } else {
-//     horarios.innerHTML = dadosTerapeuta.horarios.map(h => `
-//         <div class="horario-item">
-//             <span class="horario-hora">${h.hora}</span>
-//             <button class="btn-agendar">+ Agendar</button>
-//         </div>
-//     `).join('');
-// }
 
 // Preenche pacientes atuais
 // const pacientesGrid = document.getElementById('pacientes-grid');

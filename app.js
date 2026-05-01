@@ -63,9 +63,9 @@ app.get("/pacientes", verificarLogin, async (req, res) => {
         const client = await db.connect();
         const result = await client.query('SELECT * FROM teadmin.pacientes');
         console.log(result.rows);
-    client.release();
+        client.release();
 
-    const eventos = result.rows.map(c => ({
+        const eventos = result.rows.map(c => ({
         title: c.nome + ' ' + c.sobrenome,
         start: c.data_consulta
     }));
@@ -93,6 +93,32 @@ app.get("/listar_pacientes", async(req,res)=>{
 
 app.get('/send_user', verificarLogin, (req, res) => {
   res.send(req.session.usuario);
+})
+
+app.get('/send_horarios', async (req, res) => {
+    try {
+        const client = await db.connect();
+        const result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${req.session.usuario.id_profissional} ORDER BY data_consulta`);
+        let consultasRaw = result.rows;
+        let consultasLista = [];
+        
+        if (consultasRaw.length > 0) {
+            for (const i of consultasRaw) {
+                let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
+                paciente = paciente.rows[0];
+                paciente.hora_consulta = i.hora_consulta;
+                paciente.data_consulta = i.data_consulta;
+                consultasLista.push(paciente);
+            }
+        }
+
+        console.log(consultasLista);
+        client.release();
+
+        res.send(consultasLista);
+    } catch (error) {
+        res.send(`Erro: ${error}`)
+    }
 })
 
 ///////////////////////////////////////////
