@@ -18,9 +18,6 @@ async function init() {
     const dadosTerapeuta = await terapeutaData('send_user');
     const consultasTerapeuta = await terapeutaData('send_horarios');
 
-    console.log(dadosTerapeuta);
-    console.log(consultasTerapeuta);
-
     document.getElementById('nome-terapeuta').textContent = dadosTerapeuta.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosTerapeuta.nome;
 
@@ -31,7 +28,7 @@ async function init() {
     } else {
         horarios.innerHTML = consultasTerapeuta.map(h => `
             <div class="horario-item">
-                <span class="horario-hora">${h.hora}</span>
+                <span class="horario-hora">${h.nome}`+` - ${h.hora_consulta}</span>
                 <button class="btn-agendar">+ Agendar</button>
             </div>
         `).join('');

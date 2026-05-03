@@ -32,7 +32,8 @@ CREATE TABLE responsavel (
     data_nascimento DATE NOT NULL,
     sexo CHAR(1) NOT NULL,
     cpf CHAR(11) UNIQUE NOT NULL,
-    email VARCHAR UNIQUE
+    email VARCHAR UNIQUE,
+    senha VARCHAR
 );
 
 CREATE TABLE paciente_responsavel (
@@ -62,6 +63,7 @@ CREATE TABLE profissional (
     conselho VARCHAR NOT NULL,
     num_conselho_profissional VARCHAR NOT NULL,
     uf_num_conselho CHAR(2) NOT NULL,
+    senha VARCHAR,
     data_contratacao DATE,
     fim_contratacao DATE,
     UNIQUE (conselho, num_conselho_profissional, uf_num_conselho)
@@ -77,7 +79,8 @@ CREATE TABLE recepcionista (
     telefone VARCHAR NOT NULL,
     data_contratacao DATE NOT NULL,
     fim_contratacao DATE,
-    tipo_contrato VARCHAR NOT NULL
+    tipo_contrato VARCHAR NOT NULL,
+    senha VARCHAR
 );
 
 CREATE TABLE status_da_consulta (

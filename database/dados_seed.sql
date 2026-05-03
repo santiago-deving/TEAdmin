@@ -22,12 +22,12 @@ INSERT INTO pacientes (nome, sobrenome, data_nascimento, sexo, cpf) VALUES
 -- =========================
 -- RESPONSÁVEIS
 -- =========================
-INSERT INTO responsavel (nome, sobrenome, data_nascimento, sexo, cpf, email) VALUES
-('Carlos','Silva','1985-05-10','M','77777777777','carlos@email.com'),
-('Juliana','Souza','1987-08-20','F','88888888888','juliana@email.com'),
-('Roberto','Oliveira','1980-02-14','M','99999999999','roberto@email.com'),
-('Fernanda','Costa','1990-03-22','F','10101010101','fernanda@email.com'),
-('Paulo','Pereira','1982-07-12','M','12121212121','paulo@email.com');
+INSERT INTO responsavel (nome, sobrenome, data_nascimento, sexo, cpf, email, senha) VALUES
+('Carlos','Silva','1985-05-10','M','77777777777','carlos@email.com','senha101'),
+('Juliana','Souza','1987-08-20','F','88888888888','juliana@email.com','senha123'),
+('Roberto','Oliveira','1980-02-14','M','99999999999','roberto@email.com','senha454'),
+('Fernanda','Costa','1990-03-22','F','10101010101','fernanda@email.com','senha456'),
+('Paulo','Pereira','1982-07-12','M','12121212121','paulo@email.com','senha789');
 
 -- =========================
 -- PACIENTE RESPONSÁVEL
@@ -44,21 +44,21 @@ INSERT INTO paciente_responsavel VALUES
 -- PROFISSIONAIS
 -- =========================
 INSERT INTO profissional 
-(nome, sobrenome, data_nascimento, sexo, cpf, conselho, num_conselho_profissional, uf_num_conselho)
+(nome, sobrenome, data_nascimento, sexo, cpf, conselho, num_conselho_profissional, uf_num_conselho,senha)
 VALUES
-('Dr. João','Médico','1980-01-01','M','13131313131','CRM','12345','SP'),
-('Dra. Paula','Psicóloga','1985-02-02','F','14141414141','CRP','54321','SP'),
-('Carlos','Fisioterapeuta','1988-03-03','M','15151515151','CREFITO','22222','SP'),
-('Luciana','Fonoaudióloga','1990-04-04','F','16161616161','CREFONO','33333','SP');
+('Dr. João','Médico','1980-01-01','M','13131313131','CRM','12345','SP','senha123'),
+('Dra. Paula','Psicóloga','1985-02-02','F','14141414141','CRP','54321','SP', 'senha456'),
+('Carlos','Fisioterapeuta','1988-03-03','M','15151515151','CREFITO','22222','SP', 'senha789'),
+('Luciana','Fonoaudióloga','1990-04-04','F','16161616161','CREFONO','33333','SP', 'senha454');
 
 -- =========================
 -- RECEPCIONISTA
 -- =========================
 INSERT INTO recepcionista 
-(nome, sobrenome, data_nascimento, sexo, cpf, telefone, data_contratacao, tipo_contrato)
+(nome, sobrenome, data_nascimento, sexo, cpf, telefone, data_contratacao, tipo_contrato, senha)
 VALUES
-('Bruna','Almeida','1995-05-05','F','17171717171','19999999999','2023-01-01','CLT'),
-('Rafael','Santos','1992-06-06','M','18181818181','18888888888','2023-01-01','CLT');
+('Bruna','Almeida','1995-05-05','F','17171717171','19999999999','2023-01-01','CLT','senha123'),
+('Rafael','Santos','1992-06-06','M','18181818181','18888888888','2023-01-01','CLT','senha101');
 
 -- =========================
 -- CONSULTAS
@@ -196,7 +196,7 @@ INSERT INTO telefone_responsavel (id_responsavel, telefone, tipo) VALUES
 -- senha fictícia (exemplo bcrypt): $2b$10$abcdefghijklmnopqrstuv
 
 INSERT INTO usuario 
-(login, senha_hash, tipo_usuario, id_profissional, id_recepcionista, id_responsavel)
+(login, senha, tipo_usuario, id_profissional, id_recepcionista, id_responsavel)
 VALUES
 -- ADMIN (sem vínculo)
 ('admin', 'admin', 'admin', NULL, NULL, NULL),

@@ -23,7 +23,7 @@ async function validac_login(req, res, next) {
     }
 
     if (user.rows.length === 0) {
-      user = await client.query('SELECT *, 2 AS tipo FROM teadmin.adm WHERE email = $1 AND senha = $2', [email, senha]);
+      user = await client.query('SELECT *, 2 AS tipo FROM teadmin.recepcionista WHERE email = $1 AND senha = $2', [email, senha]);
     }
 
     if (user.rows.length === 0) {
