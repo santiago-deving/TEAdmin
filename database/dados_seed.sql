@@ -44,12 +44,12 @@ INSERT INTO paciente_responsavel VALUES
 -- PROFISSIONAIS
 -- =========================
 INSERT INTO profissional 
-(nome, sobrenome, data_nascimento, sexo, cpf, conselho, num_conselho_profissional, uf_num_conselho,senha)
+(nome, sobrenome, data_nascimento, sexo, cpf, conselho, num_conselho_profissional, uf_num_conselho, email, senha)
 VALUES
-('Dr. João','Médico','1980-01-01','M','13131313131','CRM','12345','SP','senha123'),
-('Dra. Paula','Psicóloga','1985-02-02','F','14141414141','CRP','54321','SP', 'senha456'),
-('Carlos','Fisioterapeuta','1988-03-03','M','15151515151','CREFITO','22222','SP', 'senha789'),
-('Luciana','Fonoaudióloga','1990-04-04','F','16161616161','CREFONO','33333','SP', 'senha454');
+('Dr. João','Médico','1980-01-01','M','13131313131','CRM','12345','SP', 'drjoao@profissional.com','senha123'),
+('Dra. Paula','Psicóloga','1985-02-02','F','14141414141','CRP','54321','SP', 'drapaula@profissional.com', 'senha456'),
+('Carlos','Fisioterapeuta','1988-03-03','M','15151515151','CREFITO','22222','SP', 'carlos@profissional.com', 'senha789'),
+('Luciana','Fonoaudióloga','1990-04-04','F','16161616161','CREFONO','33333','SP', 'luciana@profissional.com', 'senha454');
 
 -- =========================
 -- RECEPCIONISTA
@@ -57,8 +57,8 @@ VALUES
 INSERT INTO recepcionista 
 (nome, sobrenome, data_nascimento, sexo, cpf, telefone, data_contratacao, tipo_contrato, senha)
 VALUES
-('Bruna','Almeida','1995-05-05','F','17171717171','19999999999','2023-01-01','CLT','senha123'),
-('Rafael','Santos','1992-06-06','M','18181818181','18888888888','2023-01-01','CLT','senha101');
+('Bruna','Almeida','1995-05-05','F','17171717171','19999999999','2023-01-01','CLT', 'bruna@recepcao.com' ,'senha123'),
+('Rafael','Santos','1992-06-06','M','18181818181','18888888888','2023-01-01','CLT', 'rafael@recepcao.com' ,'senha101');
 
 -- =========================
 -- CONSULTAS

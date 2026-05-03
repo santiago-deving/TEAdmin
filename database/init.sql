@@ -63,7 +63,8 @@ CREATE TABLE profissional (
     conselho VARCHAR NOT NULL,
     num_conselho_profissional VARCHAR NOT NULL,
     uf_num_conselho CHAR(2) NOT NULL,
-    senha VARCHAR,
+    email VARCHAR NOT NULL,
+    senha VARCHAR NOT NULL,
     data_contratacao DATE,
     fim_contratacao DATE,
     UNIQUE (conselho, num_conselho_profissional, uf_num_conselho)
@@ -80,6 +81,7 @@ CREATE TABLE recepcionista (
     data_contratacao DATE NOT NULL,
     fim_contratacao DATE,
     tipo_contrato VARCHAR NOT NULL,
+    email VARCHAR NOT NULL,
     senha VARCHAR
 );
 
