@@ -1,6 +1,8 @@
 const express = require('express');
 const session = require("express-session");
+var bodyParser = require('body-parser');
 const path = require('path');
+
 require("dotenv").config();
 
 const app = express();
@@ -13,6 +15,7 @@ const e = require('express');
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
 
+app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
@@ -34,15 +37,34 @@ app.use(session({
 /////////////// ROTAS GET ///////////////// 
 ///////////////////////////////////////////
 
-app.get("/", verificarLogin,(req, res) => {
-    res.redirect('/painel_terapeutas');
+app.get("/", (req, res) => {
+    
+    if (!req.session || !req.session.usuario) {
+        return res.redirect("/login");
+    }
+
+    let usuario = req.session.usuario;
+    
+    if (usuario.tipo === 0) {
+        res.redirect('/painel_pais')
+    } 
+    if (usuario.tipo === 1) {
+        res.redirect('/painel_terapeutas');
+    } 
+    if (usuario.tipo === 2) {
+        res.redirect('/painel_admin')
+    }
 });
 
 app.get("/login", (req, res) => {
-    res.render('login');
+    if (req.session.usuario) {
+        res.redirect('/')
+    } else {
+        res.render('login');
+    }
 });
 
-app.get("/painel_admin", (req, res) => {
+app.get("/painel_admin", verificarLogin(2),(req, res) => {
     res.render('painel-admin');
 });
 
@@ -50,7 +72,8 @@ app.get("/painel_pais", (req, res) => {
     res.render('painel-pais');
 });
 
-app.get('/painel_terapeutas', (req, res) => {
+app.get('/painel_terapeutas', verificarLogin(1), (req, res) => {
+    console.log(req.session.usuario);
     res.render('painel-terapeuta', {user: req.session.usuario});
 });
 
@@ -91,7 +114,7 @@ app.get("/listar_pacientes", async(req,res)=>{
     }
 });
 
-app.get('/send_user', verificarLogin, (req, res) => {
+app.get('/send_user', (req, res) => {
   res.send(req.session.usuario);
 })
 
@@ -106,6 +129,7 @@ app.get('/send_horarios', async (req, res) => {
             for (const i of consultasRaw) {
                 let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
                 paciente = paciente.rows[0];
+                paciente.id_consulta = i.id_consulta;
                 paciente.hora_consulta = i.hora_consulta;
                 paciente.data_consulta = i.data_consulta;
                 consultasLista.push(paciente);
@@ -128,6 +152,21 @@ app.get('/send_horarios', async (req, res) => {
 app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
+
+
+
+// for routes looking like this `/products?page=1&pageSize=50`
+app.get('/atender_consulta', verificarLogin(1), function(req, res) {
+    let id_consulta = req.query.id_consulta;
+    const client = await db.connect();
+    const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
+
+    client.release();
+
+    res.send('Sucesso!');
+});
+
+
 
 app.post('/api/agendamentos', async (req, res) => {
   res.send('Sucesso!');

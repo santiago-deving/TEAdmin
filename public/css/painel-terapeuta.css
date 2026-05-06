@@ -106,19 +106,35 @@
     color: var(--azul);
 }
 
-.btn-agendar {
+.btn-presente {
     background-color: var(--azul);
     color: var(--branco);
     border: none;
     border-radius: 8px;
     padding: 6px 14px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
 }
 
-.btn-agendar:hover {
+.btn-presente:hover {
+    background-color: #1a6a8a;
+}
+
+.btn-ausente {
+    background-color: var(--azul);
+    color: var(--branco);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-ausente:hover {
     background-color: #1a6a8a;
 }
 

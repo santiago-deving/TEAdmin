@@ -1,10 +1,18 @@
+// const { use } = require('react');
 const db = require('../db');
 
-function verificarLogin(req, res, next) {
-  if (req.session && req.session.usuario) {
-    return next();
-  }
-  return res.redirect("/login");
+function verificarLogin(userType) {
+  return function(req, res, next) {
+    if (req.session && req.session.usuario) {
+      let user = req.session.usuario;
+      if (userType === undefined || userType === user.tipo) {
+        return next();
+      } else {
+        return res.redirect('/');
+      }
+    }
+    return res.redirect("/login");
+  };
 }
 
 async function validac_login(req, res, next) {
@@ -16,6 +24,9 @@ async function validac_login(req, res, next) {
   try {
     let user
     
+    // responsavel = 0
+    // profissional = 1
+    // administrativo = 2
     user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
 
     if (user.rows.length === 0) {
@@ -27,7 +38,7 @@ async function validac_login(req, res, next) {
     }
 
     if (user.rows.length === 0) {
-      return next();
+      return res.send('credenciais inválidas!');
     }
 
     user = user.rows[0];
@@ -35,8 +46,8 @@ async function validac_login(req, res, next) {
     req.session.usuario = user;  // salva o usuario no cookie
 
     return next();
-  } catch (e) {
-    res.send(`Erro: ${e}`);
+  } catch (error) {
+    res.send(`Erro: ${error}`);
   } finally {
     client.release();
   }

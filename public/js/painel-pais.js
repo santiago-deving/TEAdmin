@@ -23,6 +23,24 @@ closeBtn.addEventListener('click', ()=>{
     overlay.classList.toggle('ativo');
 })
 
+async function responsavelData(route) {
+    try {
+        const response = await fetch(route);
+        if(!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+async function init () {
+    const dadosResponsavel = await responsavelData('send_user');
+}
+
 const dadosUsuario = {
     nome: "Usuário",         // virá do backend
     filhoNome: "seu filho(a)", // virá do backend
