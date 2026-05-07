@@ -64,7 +64,7 @@ app.get("/login", (req, res) => {
     }
 });
 
-app.get("/painel_admin", verificarLogin(2),(req, res) => {
+app.get("/painel_admin", verificarLogin([2]),(req, res) => {
     res.render('painel-admin');
 });
 
@@ -72,7 +72,7 @@ app.get("/painel_pais", (req, res) => {
     res.render('painel-pais');
 });
 
-app.get('/painel_terapeutas', verificarLogin(1), (req, res) => {
+app.get('/painel_terapeutas', verificarLogin([1]), (req, res) => {
     console.log(req.session.usuario);
     res.render('painel-terapeuta', {user: req.session.usuario});
 });
@@ -153,20 +153,22 @@ app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
 
-
-
 // for routes looking like this `/products?page=1&pageSize=50`
-app.get('/atender_consulta', verificarLogin(1), function(req, res) {
-    let id_consulta = req.query.id_consulta;
-    const client = await db.connect();
-    const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
+app.post('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
+    try {
+        let id_consulta = req.query.id_consulta;
+        console.log(id_consulta);
+        const client = await db.connect();
+        const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
 
-    client.release();
+        client.release();
 
-    res.send('Sucesso!');
+        res.send('Sucesso!');
+    } catch(error) {
+        console.log(error);
+    }
+
 });
-
-
 
 app.post('/api/agendamentos', async (req, res) => {
   res.send('Sucesso!');

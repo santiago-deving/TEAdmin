@@ -5,7 +5,7 @@ function verificarLogin(userType) {
   return function(req, res, next) {
     if (req.session && req.session.usuario) {
       let user = req.session.usuario;
-      if (userType === undefined || userType === user.tipo) {
+      if (userType === undefined || userType.includes(user.tipo)) {
         return next();
       } else {
         return res.redirect('/');

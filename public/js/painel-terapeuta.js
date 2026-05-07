@@ -28,10 +28,25 @@ async function init() {
         horarios.innerHTML = consultasTerapeuta.map(h => `
             <div class="horario-item">
                 <span class="horario-hora">${h.nome}`+` - ${h.hora_consulta}</span>
-                <button class="btn-presente" value="/atender_consulta?id_consulta = ${h.id_consulta}">&#9989</button>
-                <button class="btn-ausente" value="/ausencia_consulta?id_consulta = ${h.id_consulta}">&#10060</button>
+                <button class="btn-presente" value="/atender_consulta?id_consulta=${h.id_consulta}">&#9989</button>
+                <button class="btn-ausente" value="/ausencia_consulta?id_consulta=${h.id_consulta}">&#10060</button>
             </div>
         `).join('');
+    }
+
+    const btnsPresente = document.getElementsByClassName('btn-presente');
+
+    for (const btn of btnsPresente) {
+        btn.addEventListener('click', async function() {
+            try {
+                const response = await fetch(this.value, { method: 'POST' });
+                if (!response.ok) throw new Error(`Response status: ${response.status}`);
+                const result = await response.json();
+                console.log(result);
+            } catch (error) {
+                console.error(error.message);
+            }
+        });
     }
 }
 
