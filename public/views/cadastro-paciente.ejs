@@ -11,6 +11,22 @@
 <body>
     <div class="overlay" id="overlay"></div>
 
+    <div class="sidebar" id="sidebar">
+        <div class="closeBtn" id="closeBtn">
+            <i class="bi bi-x"></i>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/painel_admin">Painel Administrativo</a></li>
+                <li><a href="/painel_pais">Acompanhamento</a></li>
+                <li><a href="/calendario">Calendário</a></li>
+                <li><a href="/cadastro-paciente">Cadastro de Paciente</a></li>
+                <li><a href="/cadastro-responsavel">Cadastro de Responsável</a></li>
+                <li><a href="#">Dados</a></li>
+            </ul>
+        </nav>
+    </div>
+
     <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
         <span>Acessibilidade:</span>
@@ -26,42 +42,24 @@
         <div class="menu_btn" id="menu_btn">
             <i class="bi bi-list"></i>
         </div>
-
-        <div class="sidebar" id="sidebar">
-            <div class="closeBtn" id="closeBtn">
-                <i class="bi bi-x"></i>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="/">Inicio</a></li>
-                    <li><a href="/painel_pais">Painel</a></li>
-                    <li><a href="/calendario">Calendario</a></li>
-                    <li><a href="#">Dados</a></li>
-                </ul>
-            </nav>
-        </div>
-
         <div class="header-logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>
         <div class="header-info">
             <span>⚙️ Admin: <span id="nome-admin">...</span></span>
-            <a href="/pages/login.html" class="btn-sair">Sair</a>
+            <a href="/logout" class="btn-sair">Sair</a>
         </div>
     </header>
 
     <main class="painel-container">
 
-        <!-- BOAS VINDAS -->
         <div class="boas-vindas">
             <h2>👦 Cadastro de Paciente</h2>
             <p>Preencha os dados abaixo para cadastrar um novo paciente na clínica</p>
         </div>
 
-        <!-- FORMULÁRIO -->
         <div class="form-wrapper">
 
-            <!-- SEÇÃO: DADOS PESSOAIS -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>📋 Dados Pessoais</h2>
@@ -109,7 +107,6 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO: CONTATO -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>📞 Contato</h2>
@@ -126,7 +123,6 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO: ENDEREÇO -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>📍 Endereço</h2>
@@ -172,7 +168,6 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO: PLANO DE SAÚDE -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>🏥 Plano de Saúde</h2>
@@ -193,7 +188,6 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO: OBSERVAÇÕES -->
             <section class="card-secao">
                 <div class="secao-header">
                     <h2>📝 Observações</h2>
@@ -206,7 +200,6 @@
                 </div>
             </section>
 
-            <!-- BOTÕES -->
             <div class="form-acoes">
                 <button type="button" class="btn-cancelar" onclick="window.history.back()">
                     <i class="bi bi-arrow-left"></i> Cancelar

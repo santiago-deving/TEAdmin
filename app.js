@@ -81,6 +81,14 @@ app.get("/calendario", (req, res) => {
     res.render('calendario');
 });
 
+app.get("/cadastro-paciente", verificarLogin([2]), (req, res) => {
+    res.render('cadastro-paciente');
+});
+
+app.get("/cadastro-responsavel", verificarLogin([2]), (req, res) => {
+    res.render('cadastro-responsavel');
+});
+
 app.get("/pacientes", verificarLogin, async (req, res) => {
     try {
         const client = await db.connect();
@@ -124,6 +132,7 @@ app.get('/send_horarios', async (req, res) => {
         const result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${req.session.usuario.id_profissional} ORDER BY data_consulta`);
         let consultasRaw = result.rows;
         let consultasLista = [];
+
         
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
@@ -144,6 +153,12 @@ app.get('/send_horarios', async (req, res) => {
         res.send(`Erro: ${error}`)
     }
 })
+
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/login");
+});
+
 
 ///////////////////////////////////////////
 /////////////// ROTAS POST //////////////// 

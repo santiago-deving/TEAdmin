@@ -27,19 +27,24 @@ async function validac_login(req, res, next) {
     // responsavel = 0
     // profissional = 1
     // administrativo = 2
-    user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
+    // Verifica admin PRIMEIRO
+        user = await client.query("SELECT *, 2 AS tipo FROM teadmin.usuario WHERE login = $1 AND senha_hash = $2 AND tipo_usuario = 'admin'", [email, senha]);
 
-    if (user.rows.length === 0) {
-      user = await client.query('SELECT *, 1 AS tipo FROM teadmin.profissional WHERE email = $1 AND senha = $2', [email, senha]);
-    }
+if (user.rows.length === 0) {
+  user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
+      } 
 
-    if (user.rows.length === 0) {
-      user = await client.query('SELECT *, 2 AS tipo FROM teadmin.recepcionista WHERE email = $1 AND senha = $2', [email, senha]);
-    }
+      if (user.rows.length === 0) {
+  user = await client.query('SELECT *, 1 AS tipo FROM teadmin.profissional WHERE email = $1 AND senha = $2', [email, senha]);
+      }
 
-    if (user.rows.length === 0) {
-      return res.send('credenciais inválidas!');
-    }
+if (user.rows.length === 0) {
+  user = await client.query('SELECT *, 2 AS tipo FROM teadmin.recepcionista WHERE email = $1 AND senha = $2', [email, senha]);
+      }
+
+ if (user.rows.length === 0) {
+  return res.send('credenciais inválidas!');
+      }
 
     user = user.rows[0];
 

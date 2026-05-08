@@ -11,6 +11,22 @@
 <body>
     <div class="overlay" id="overlay"></div>
 
+    <div class="sidebar" id="sidebar">
+        <div class="closeBtn" id="closeBtn">
+            <i class="bi bi-x"></i>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/painel_admin">Painel Administrativo</a></li>
+                <li><a href="/painel_pais">Acompanhamento</a></li>
+                <li><a href="/calendario">Calendário</a></li>
+                <li><a href="/cadastro-paciente">Cadastro de Paciente</a></li>
+                <li><a href="/cadastro-responsavel">Cadastro de Responsável</a></li>
+                <li><a href="#">Dados</a></li>
+            </ul>
+        </nav>
+    </div>
+
     <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
         <span>Acessibilidade:</span>
@@ -26,33 +42,16 @@
         <div class="menu_btn" id="menu_btn">
             <i class="bi bi-list"></i>
         </div>
-        
-        <div class="sidebar" id="sidebar">
-            <div class="closeBtn" id="closeBtn">
-                <i class="bi bi-x"></i>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="/">Inicio</a></i>
-                    <li><a href="/painel_pais">Painel</a></i>
-                    <li><a href="/calendario">Calendario</a></i>
-                    <li><a href="#">Dados</a></i>
-                </ul>
-            </nav>
-        </div>
-        
         <div class="header-logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>
         <div class="header-info">
-            <span>👤 Olá, <span id="nome-usuario"><i class="bi bi-list"></i>...</span></span>
-            <a href="/login" class="btn-sair">Sair</a>
+            <span>👤 Olá, <span id="nome-usuario">...</span></span>
+            <a href="/logout" class="btn-sair">Sair</a>
         </div>
     </header>
 
     <main class="painel-container">
-        
-        
 
         <div class="boas-vindas">
             <h2>🎉 Bem-vindo(a), <span id="nome-boas-vindas">...</span>!</h2>

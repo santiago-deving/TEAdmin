@@ -8,18 +8,18 @@ const overlay = document.getElementById('overlay');
 const closeBtn = document.getElementById('closeBtn');
 
 sidebarBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('ativo');
+    sidebar.classList.toggle('aberto');
     overlay.classList.toggle('ativo');
 });
 
 overlay.addEventListener('click', ()=>{
-    sidebar.classList.toggle('ativo');
+    sidebar.classList.toggle('aberto');
     overlay.classList.toggle('ativo');
 })
 
 closeBtn.addEventListener('click', ()=>{
     console.log('clicked');
-    sidebar.classList.toggle('ativo');
+    sidebar.classList.toggle('aberto');
     overlay.classList.toggle('ativo');
 })
 
