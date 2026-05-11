@@ -15,7 +15,11 @@ async function terapeutaData(route) {
 
 async function init() {
     const dadosTerapeuta = await terapeutaData('send_user');
-    const consultasTerapeuta = await terapeutaData('send_horarios');
+    const pacientes_dados = await terapeutaData('send_paciente_dados');
+    const pacientes = pacientes_dados.pacientes;
+    const consultasTerapeuta = pacientes_dados.consultasLista;
+
+    console.log(pacientes_dados);
 
     document.getElementById('nome-terapeuta').textContent = dadosTerapeuta.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosTerapeuta.nome;
@@ -34,6 +38,21 @@ async function init() {
         `).join('');
     }
 
+    // Preenche pacientes atuais
+    const pacientesGrid = document.getElementById('pacientes-grid');
+    if (dadosTerapeuta.pacientes.length === 0) {
+        pacientesGrid.innerHTML = '<p class="carregando">Nenhum paciente cadastrado ainda.</p>';
+    } else {
+        pacientesGrid.innerHTML = pacientes.map(p => `
+            <div class="paciente-card">
+                <div class="paciente-avatar">👦</div>
+                <div class="paciente-nome">${p.nome}</div>
+                <div class="paciente-info">${p.ultimaPresenca}</div>
+            </div>
+        `).join('');
+    }
+
+    // event listener do botão de presença
     const btnsPresente = document.getElementsByClassName('btn-presente');
 
     for (const btn of btnsPresente) {
@@ -79,16 +98,3 @@ init();
 // }
 
 
-// Preenche pacientes atuais
-// const pacientesGrid = document.getElementById('pacientes-grid');
-// if (dadosTerapeuta.pacientes.length === 0) {
-//     pacientesGrid.innerHTML = '<p class="carregando">Nenhum paciente cadastrado ainda.</p>';
-// } else {
-//     pacientesGrid.innerHTML = dadosTerapeuta.pacientes.map(p => `
-//         <div class="paciente-card">
-//             <div class="paciente-avatar">👦</div>
-//             <div class="paciente-nome">${p.nome}</div>
-//             <div class="paciente-info">${p.ultimaPresenca}</div>
-//         </div>
-//     `).join('');
-// }

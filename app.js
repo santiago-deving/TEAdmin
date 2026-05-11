@@ -126,18 +126,21 @@ app.get('/send_user', (req, res) => {
   res.send(req.session.usuario);
 })
 
-app.get('/send_horarios', async (req, res) => {
+app.get('/send_paciente_dados', async (req, res) => {
     try {
         const client = await db.connect();
         const result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${req.session.usuario.id_profissional} ORDER BY data_consulta`);
         let consultasRaw = result.rows;
         let consultasLista = [];
+        let pacientes = [];
 
         
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
                 let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
                 paciente = paciente.rows[0];
+                console.log(paciente);
+                pacientes.push({...paciente});
                 paciente.id_consulta = i.id_consulta;
                 paciente.hora_consulta = i.hora_consulta;
                 paciente.data_consulta = i.data_consulta;
@@ -145,20 +148,20 @@ app.get('/send_horarios', async (req, res) => {
             }
         }
 
-        console.log(consultasLista);
+        let pacientes_dados = {pacientes: pacientes, consultasLista: consultasLista}
+
+        console.log(pacientes_dados);
         client.release();
 
-        res.send(consultasLista);
+        res.send(pacientes_dados);
     } catch (error) {
         res.send(`Erro: ${error}`)
     }
 })
 
-app.get("/logout", (req, res) => {
-    req.session.destroy();
-    res.redirect("/login");
-});
-
+app.get('/', (req, res) => {
+  res.send('GET request to the homepage')
+})
 
 ///////////////////////////////////////////
 /////////////// ROTAS POST //////////////// 
@@ -168,8 +171,20 @@ app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
 
-// for routes looking like this `/products?page=1&pageSize=50`
-app.post('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
+app.post("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/login");
+});
+
+app.post('/api/agendamentos', async (req, res) => {
+  res.send('Sucesso!');
+})
+
+///////////////////////////////////////////
+/////////////// ROTAS PUT //////////////// 
+///////////////////////////////////////////
+
+app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
     try {
         let id_consulta = req.query.id_consulta;
         console.log(id_consulta);
@@ -185,9 +200,7 @@ app.post('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
 
 });
 
-app.post('/api/agendamentos', async (req, res) => {
-  res.send('Sucesso!');
-})
+//////////////////////////////////////////
 
 app.listen(port, ()=>{
     console.log(`Express rodando na em: http://localhost:${port}`);

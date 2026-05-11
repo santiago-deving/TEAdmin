@@ -28,7 +28,7 @@ async function validac_login(req, res, next) {
     // profissional = 1
     // administrativo = 2
     // Verifica admin PRIMEIRO
-        user = await client.query("SELECT *, 2 AS tipo FROM teadmin.usuario WHERE login = $1 AND senha_hash = $2 AND tipo_usuario = 'admin'", [email, senha]);
+    user = await client.query("SELECT *, 2 AS tipo FROM teadmin.usuario WHERE email = $1 AND senha = $2", [email, senha]);
 
 if (user.rows.length === 0) {
   user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
