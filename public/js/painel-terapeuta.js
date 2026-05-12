@@ -1,5 +1,3 @@
-// Futuramente esses dados virão do backend após autenticação
-
 async function terapeutaData(route) {
     try {
         const response = await fetch(route);
@@ -16,10 +14,9 @@ async function terapeutaData(route) {
 async function init() {
     const dadosTerapeuta = await terapeutaData('send_user');
     const pacientes_dados = await terapeutaData('send_paciente_dados');
+
     const pacientes = pacientes_dados.pacientes;
     const consultasTerapeuta = pacientes_dados.consultasLista;
-
-    console.log(pacientes_dados);
 
     document.getElementById('nome-terapeuta').textContent = dadosTerapeuta.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosTerapeuta.nome;
@@ -71,6 +68,29 @@ async function init() {
 
 init();
 
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebarBtn = document.getElementById("menu_btn");
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const closeBtn = document.getElementById('closeBtn');
+
+sidebarBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('aberto');
+    overlay.classList.toggle('ativo');
+});
+
+overlay.addEventListener('click', ()=>{
+    sidebar.classList.toggle('aberto');
+    overlay.classList.toggle('ativo');
+})
+
+closeBtn.addEventListener('click', ()=>{
+    console.log('clicked');
+    sidebar.classList.toggle('aberto');
+    overlay.classList.toggle('ativo');
+})
+})
 
 
 // Preenche tabela de pacientes

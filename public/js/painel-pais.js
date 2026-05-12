@@ -39,7 +39,10 @@ async function responsavelData(route) {
 
 async function init () {
     const dadosResponsavel = await responsavelData('send_user');
+    const dadosConsultas = await responsavelData('send_paciente_dados');
 }
+
+init();
 
 const dadosUsuario = {
     nome: "Usuário",         // virá do backend

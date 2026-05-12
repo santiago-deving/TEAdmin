@@ -68,7 +68,7 @@ app.get("/painel_admin", verificarLogin([2]),(req, res) => {
     res.render('painel-admin');
 });
 
-app.get("/painel_pais", (req, res) => {
+app.get("/painel_pais", verificarLogin([0]) ,(req, res) => {
     res.render('painel-pais');
 });
 
@@ -108,28 +108,43 @@ app.get("/pacientes", verificarLogin, async (req, res) => {
     
 })
 
-app.get("/listar_pacientes", async(req,res)=>{
-    try {
-        const client = await db.connect();
-        let pac = req.query.id_pac
-        console.log(pac)
-        let [result] = await client.query(`SELECT * FROM pacientes WHERE id_paciente = ${pac}`);
-        console.log(result);
-        res.send(result);
-        client.release();
-    } catch (e){
-        res.send(e);
-    }
-});
+// app.get("/listar_pacientes", async(req,res)=>{
+//     try {
+//         const client = await db.connect();
+//         let pac = req.query.id_pac
+//         console.log(pac)
+//         let [result] = await client.query(`SELECT * FROM pacientes WHERE id_paciente = ${pac}`);
+//         console.log(result);
+//         res.send(result);
+//         client.release();
+//     } catch (e){
+//         res.send(e);
+//     }
+// });
 
 app.get('/send_user', (req, res) => {
   res.send(req.session.usuario);
 })
 
-app.get('/send_paciente_dados', async (req, res) => {
+app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
     try {
+        let user = req.session.usuario;
         const client = await db.connect();
-        const result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${req.session.usuario.id_profissional} ORDER BY data_consulta`);
+
+        var result = {};
+
+        if (user.tipo === 2) {
+            result = await client.query(`SELECT * FROM teadmin.consulta ORDER BY data_consulta`);
+        } if (user.tipo === 1) {
+            result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${user.id_profissional} ORDER BY data_consulta`);
+        } else {
+            let id_pacienterRaw = await client.query('SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1', [user.id_responsavel]);
+            let id_paciente = id_pacienterRaw.rows[0];
+            result = await client.query('SELECT * FROM teadmin.consulta where id_paciente = $1', [id_paciente]);
+        }
+
+        console.log(result);
+        
         let consultasRaw = result.rows;
         let consultasLista = [];
         let pacientes = [];

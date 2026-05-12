@@ -6,8 +6,27 @@
     <title>TEAdm - Painel do Terapeuta</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/painel-terapeuta.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="closeBtn" id="closeBtn">
+            <i class="bi bi-x"></i>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/painel_admin">Painel Administrativo</a></li>
+                <li><a href="/painel_pais">Acompanhamento</a></li>
+                <li><a href="/calendario">Calendário</a></li>
+                <li><a href="/cadastro-paciente">Cadastro de Paciente</a></li>
+                <li><a href="/cadastro-responsavel">Cadastro de Responsável</a></li>
+                <li><a href="#">Dados</a></li>
+            </ul>
+        </nav>
+    </div>
 
     <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
@@ -21,6 +40,9 @@
 
     <!-- HEADER -->
     <header class="header">
+        <div class="menu_btn" id="menu_btn">
+            <i class="bi bi-list"></i>
+        </div>
         <div class="header-logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>

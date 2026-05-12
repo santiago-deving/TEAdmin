@@ -1,10 +1,22 @@
 // Futuramente as sessões virão do backend
-const sessoes = {
-    // "2026-04-03": [
-    //     { hora: "14:00", nome: "Terapeuta X", tipo: "Psicóloga", status: "agendado" },
-    //     { hora: "16:30", nome: "Terapeuta Y", tipo: "Fonoaudiólogo", status: "concluido" }
-    // ]
-};
+
+async function userData(route) {
+    try {
+        const response = await fetch(route);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        } 
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+async function init() {
+
+const dadosUsuario = await userData('/send_user');
+const sessoes = await userData('/send_paciente_dados');
 
 const meses = [
     "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
@@ -102,3 +114,7 @@ function mudarMes(direcao) {
 }
 
 renderizarCalendario();
+    
+}
+
+init();
