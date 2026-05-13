@@ -137,12 +137,11 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
             for (const i of consultasRaw) {
                 let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
                 paciente = paciente.rows[0];
-                console.log(paciente);
 
-                if (!pacientes.includes(paciente)){
-                    pacientes.push({...paciente});
+                if (!pacientes.some(p => p.id_paciente === paciente.id_paciente)) {
+                    pacientes.push({ ...paciente });
                 }
-                
+
                 paciente.id_consulta = i.id_consulta;
                 paciente.id_status = i.id_status;
                 paciente.hora_consulta = i.hora_consulta;
