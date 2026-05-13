@@ -139,16 +139,14 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
             result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${user.id_profissional} ORDER BY data_consulta`);
         } else {
             let id_pacienterRaw = await client.query('SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1', [user.id_responsavel]);
-            let id_paciente = id_pacienterRaw.rows[0];
+            let id_paciente = id_pacienterRaw.rows[0].id_paciente;
+            console.log(id_paciente);
             result = await client.query('SELECT * FROM teadmin.consulta where id_paciente = $1', [id_paciente]);
         }
-
-        console.log(result);
         
         let consultasRaw = result.rows;
         let consultasLista = [];
         let pacientes = [];
-
         
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
@@ -157,6 +155,7 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
                 console.log(paciente);
                 pacientes.push({...paciente});
                 paciente.id_consulta = i.id_consulta;
+                paciente.id_status = i.id_status;
                 paciente.hora_consulta = i.hora_consulta;
                 paciente.data_consulta = i.data_consulta;
                 consultasLista.push(paciente);
