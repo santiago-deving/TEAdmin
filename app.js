@@ -108,20 +108,6 @@ app.get("/pacientes", verificarLogin, async (req, res) => {
     
 })
 
-// app.get("/listar_pacientes", async(req,res)=>{
-//     try {
-//         const client = await db.connect();
-//         let pac = req.query.id_pac
-//         console.log(pac)
-//         let [result] = await client.query(`SELECT * FROM pacientes WHERE id_paciente = ${pac}`);
-//         console.log(result);
-//         res.send(result);
-//         client.release();
-//     } catch (e){
-//         res.send(e);
-//     }
-// });
-
 app.get('/send_user', (req, res) => {
   res.send(req.session.usuario);
 })
@@ -137,23 +123,26 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
             result = await client.query(`SELECT * FROM teadmin.consulta ORDER BY data_consulta`);
         } if (user.tipo === 1) {
             result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${user.id_profissional} ORDER BY data_consulta`);
-        } else {
-            let id_pacienterRaw = await client.query('SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1', [user.id_responsavel]);
-            let id_paciente = id_pacienterRaw.rows[0].id_paciente;
-            console.log(id_paciente);
+        } if (user.tipo === 0) {
+            let id_pacienteRaw = await client.query('SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1', [user.id_responsavel]);
+            let id_paciente = id_pacienteRaw.rows[0].id_paciente;
             result = await client.query('SELECT * FROM teadmin.consulta where id_paciente = $1', [id_paciente]);
         }
         
         let consultasRaw = result.rows;
         let consultasLista = [];
         let pacientes = [];
-        
+
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
                 let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
                 paciente = paciente.rows[0];
                 console.log(paciente);
-                pacientes.push({...paciente});
+
+                if (!pacientes.includes(paciente)){
+                    pacientes.push({...paciente});
+                }
+                
                 paciente.id_consulta = i.id_consulta;
                 paciente.id_status = i.id_status;
                 paciente.hora_consulta = i.hora_consulta;
@@ -171,10 +160,6 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
     } catch (error) {
         res.send(`Erro: ${error}`)
     }
-})
-
-app.get('/', (req, res) => {
-  res.send('GET request to the homepage')
 })
 
 ///////////////////////////////////////////
