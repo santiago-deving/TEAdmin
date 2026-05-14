@@ -242,14 +242,13 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
 app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
     try {
         const user = req.session.usuario;
-        const client = await db.connect();
-
-        let pacientes;
-        if (user.tipo === 1) {
+        const tipo = parseInt(user.tipo);
+        
+        if (tipo === 1) {
             pacientes = await client.query(`
                 SELECT DISTINCT id_paciente FROM teadmin.consulta WHERE id_profissional = $1
             `, [user.id_profissional]);
-        } else if (user.tipo === 2) {
+        } else if (tipo === 2) {
             pacientes = await client.query(`SELECT DISTINCT id_paciente FROM teadmin.consulta`);
         }
 
@@ -261,7 +260,7 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
             } else if (user.tipo === 2) {
                 result = await client.query('SELECT calcfreq($1)', [p.id_paciente]);
             }
-            freqs[p.id_paciente] = result.rows[0].calcfreq;
+            freqs[String(p.id_paciente)] = result.rows[0].calcfreq;
         }
 
         client.release();
