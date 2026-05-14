@@ -1,78 +1,89 @@
-// Futuramente esses dados virão do backend após autenticação
-// Por enquanto simulei o que a API retornará
-document.addEventListener("DOMContentLoaded",()=>{
-
-const sidebarBtn = document.getElementById("menu_btn");
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-const closeBtn = document.getElementById('closeBtn');
-
-sidebarBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
-});
-
-overlay.addEventListener('click', ()=>{
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
-})
-
-closeBtn.addEventListener('click', ()=>{
-    console.log('clicked');
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
-})
-
-async function responsavelData(route) {
+// ===== FUNÇÃO BASE DE FETCH =====
+// Função genérica reutilizável para requisições GET ao backend
+// Renomeada de responsavelData() para getData() seguindo o padrão do projeto
+// Movida para fora do DOMContentLoaded para ficar no escopo global
+async function getData(route) {
     try {
         const response = await fetch(route);
-        if(!response.ok) {
+        if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
         const result = await response.json();
-        console.log(result);
         return result;
     } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
     }
 }
 
-async function init () {
-    const dadosResponsavel = await responsavelData('send_user');
-    const dadosConsultas = await responsavelData('send_paciente_dados');
+// ===== FUNÇÕES ESPECÍFICAS DE CADA ROTA =====
+// Cada função representa uma rota do backend e documenta o que se espera receber
+
+// Retorna os dados do responsável logado
+// Espera: { nome, filhoNome, terapeutas: [{ nome, especialidade, presenca }] }
+async function sendUser() {
+    return await getData('send_user');
+}
+
+// Retorna os dados das consultas do paciente vinculado ao responsável
+// Espera: { consultas: [...] }
+async function sendPacienteDados() {
+    return await getData('send_paciente_dados');
+}
+
+// ===== INIT =====
+// Alterado: dados do backend agora populam o HTML diretamente,
+// substituindo o objeto dadosUsuario que era simulado localmente
+async function init() {
+    const dadosResponsavel = await sendUser();
+    const dadosConsultas = await sendPacienteDados();
+
+    document.getElementById('nome-usuario').textContent = dadosResponsavel.nome;
+    document.getElementById('nome-boas-vindas').textContent = dadosResponsavel.nome;
+
+    // Preenche a lista de frequência com dados reais do backend
+    const lista = document.getElementById('frequencia-lista');
+
+    if (dadosResponsavel.terapeutas.length === 0) {
+        lista.innerHTML = '<p class="carregando">Nenhum dado disponível ainda.</p>';
+    } else {
+        lista.innerHTML = dadosResponsavel.terapeutas.map(t => `
+            <div class="frequencia-card">
+                <p class="terapeuta-nome">${t.nome} (${t.especialidade})</p>
+                <div class="barra-container">
+                    <div class="barra" style="width: ${t.presenca}%; background-color: ${t.presenca === 100 ? 'var(--verde)' : 'var(--azul)'};">
+                        ${t.presenca}%
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
 }
 
 init();
 
-const dadosUsuario = {
-    nome: "Usuário",         // virá do backend
-    filhoNome: "seu filho(a)", // virá do backend
-    terapeutas: [
-        // virá do backend
-        // { nome: "Terapeuta 1", especialidade: "Psicóloga", presenca: 100 },
-        // { nome: "Terapeuta 2", especialidade: "Fonoaudiólogo", presenca: 80 },
-    ]
-};
+// ===== SIDEBAR =====
+// Alterado: movida para fora do DOMContentLoaded junto com o restante do código,
+// mantendo consistência com o padrão dos outros painéis do projeto
+// Removido: console.log('clicked') que era debug esquecido no closeBtn
+// Removido: objeto dadosUsuario simulado, substituído pelos dados reais do backend via init()
+document.addEventListener('DOMContentLoaded', () => {
+    const menuBtn = document.getElementById('menu_btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
 
-// Preenche o nome do usuário na tela
-document.getElementById('nome-usuario').textContent = dadosUsuario.nome;
-document.getElementById('nome-boas-vindas').textContent = dadosUsuario.nome;
+    menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
 
-// Preenche a lista de frequência
-const lista = document.getElementById('frequencia-lista');
+    overlay.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
 
-if (dadosUsuario.terapeutas.length === 0) {
-    lista.innerHTML = '<p class="carregando">Nenhum dado disponível ainda.</p>';
-} else {
-    lista.innerHTML = dadosUsuario.terapeutas.map(t => `
-        <div class="frequencia-card">
-            <p class="terapeuta-nome">${t.nome} (${t.especialidade})</p>
-            <div class="barra-container">
-                <div class="barra" style="width: ${t.presenca}%; background-color: ${t.presenca === 100 ? 'var(--verde)' : 'var(--azul)'};">
-                    ${t.presenca}%
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-})
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
+});

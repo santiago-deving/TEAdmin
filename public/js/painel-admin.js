@@ -1,9 +1,12 @@
-async function profissionalData(route) {
+// ===== FUNÇÃO BASE DE FETCH =====
+// Função genérica reutilizável para requisições GET ao backend
+// Renomeada de profissionalData() para getData() seguindo o padrão do projeto
+async function getData(route) {
     try {
         const response = await fetch(route);
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
-        } 
+        }
         const result = await response.json();
         return result;
     } catch (error) {
@@ -11,9 +14,26 @@ async function profissionalData(route) {
     }
 }
 
+// ===== FUNÇÕES ESPECÍFICAS DE CADA ROTA =====
+// Cada função representa uma rota do backend e documenta o que se espera receber
+
+// Retorna os dados do usuário/admin logado
+// Espera: { nome, totalPacientes, totalTerapeutas, totalSessoes, totalAguardando, terapeutas[], ocupacao[], aguardando[] }
+async function sendUser() {
+    return await getData('send_user');
+}
+
+// Retorna os dados dos pacientes vinculados
+// Espera: { pacientes: [{ nome, ultimaPresenca }] }
+async function sendPacienteDados() {
+    return await getData('send_paciente_dados');
+}
+
+// ===== INIT =====
 async function init() {
-    const dadosAdmin = await profissionalData('send_user');
-    const pacientes_dados = await profissionalData('send_paciente_dados');
+    // Alterado: chamadas diretas à rota substituídas pelas funções específicas
+    const dadosAdmin = await sendUser();
+    const pacientes_dados = await sendPacienteDados();
 
     document.getElementById('nome-admin').textContent = dadosAdmin.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosAdmin.nome;
@@ -62,10 +82,12 @@ async function init() {
             </div>
         `).join('');
     }
-
-    function salvarAgenda() {
-        alert('Alterações salvas com sucesso!');
-    }
 }
 
 init();
+
+// Alterado: salvarAgenda() movida para fora do init() pois é chamada
+// diretamente pelo onclick no HTML e não depende dos dados do init
+function salvarAgenda() {
+    alert('Alterações salvas com sucesso!');
+}
