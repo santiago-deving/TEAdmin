@@ -8,6 +8,7 @@ require("dotenv").config();
 const app = express();
 const db = require("./db");
 const { verificarLogin, validac_login } = require("./middlewares/auth");
+const { calcFreq } = require('./middlewares/dataFunctions');
 const port = process.env.PORT || 3000 ;
 
 const e = require('express');
@@ -152,12 +153,22 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
 
         let pacientes_dados = {pacientes: pacientes, consultasLista: consultasLista}
 
-        console.log(pacientes_dados);
         client.release();
 
         res.send(pacientes_dados);
     } catch (error) {
         res.send(`Erro: ${error}`)
+    }
+})
+
+app.get('/ver_freq', verificarLogin(), async (req, res) => {
+    try {
+        const id_paciente = req.query.id_paciente;
+        const id_profissional = req.query.id_profissional;
+        const frequencia = await calcFreq(id_paciente, id_profissional, req);
+        return res.json(frequencia);
+    } catch (error) {
+        res.send(`Erro: ${error}`);
     }
 })
 
