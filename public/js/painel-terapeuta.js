@@ -1,4 +1,5 @@
 // ===== FUNÇÃO BASE DE FETCH =====
+// Função genérica reutilizável para requisições GET ao backend
 async function getData(route) {
     try {
         const response = await fetch(route);
@@ -13,28 +14,19 @@ async function getData(route) {
 }
 
 // ===== FUNÇÕES ESPECÍFICAS DE CADA ROTA =====
+// Cada função representa uma rota do backend e documenta o que se espera receber
 
 // Retorna os dados do usuário logado
-// Espera: { nome }
+// Espera: { nome, pacientes[] }
 async function sendUser() {
     return await getData('send_user');
 }
 
 // Retorna os dados dos pacientes e consultas do terapeuta
-// Espera: { pacientes: [{ id_paciente, nome, sobrenome }], consultasLista: [{ nome, hora_consulta, id_consulta, id_status, data_consulta }] }
+// Espera: { pacientes: [{ nome, ultimaPresenca }], consultasLista: [{ nome, hora_consulta, id_consulta }] }
 async function sendPacienteDados() {
     return await getData('send_paciente_dados');
 }
-
-async function sendPacienteDadosHoje() {
-    return await getData('send_paciente_dados/hoje');
-}
-
-// Retorna a frequência de um paciente (string "XX.XX")
-// Espera: "XX.XX"
-// async function verFreq(id_paciente) {
-//     return await getData(`/ver_freq?id_paciente=${id_paciente}`);
-// }
 
 async function verFreqTodos() {
     const result = await getData('/ver_freq/todos');
@@ -47,7 +39,10 @@ async function verFreqTodos() {
     return freqMap;
 }
 
+=======
+>>>>>>> parent of 9955d4e (painel terapeuta fim)
 // Registra presença do paciente na consulta
+// Espera: { success: true } ou status de erro
 async function atenderConsulta(id_consulta) {
     try {
         const response = await fetch(`/atender_consulta?id_consulta=${id_consulta}`, { method: 'POST' });
@@ -59,6 +54,8 @@ async function atenderConsulta(id_consulta) {
 }
 
 // Registra ausência do paciente na consulta
+// Espera: { success: true } ou status de erro
+// Adicionado: o botão de ausência existia no HTML mas não tinha função de fetch correspondente
 async function ausenciaConsulta(id_consulta) {
     try {
         const response = await fetch(`/ausencia_consulta?id_consulta=${id_consulta}`, { method: 'POST' });
@@ -71,23 +68,22 @@ async function ausenciaConsulta(id_consulta) {
 
 // ===== INIT =====
 async function init() {
+    // Alterado: chamadas diretas à rota substituídas pelas funções específicas
     const dadosTerapeuta = await sendUser();
     const pacientes_dados = await sendPacienteDados();
-    const pacientes_dados_hoje = await sendPacienteDadosHoje();
 
     const pacientes = pacientes_dados.pacientes;
     const consultasTerapeuta = pacientes_dados.consultasLista;
-    const consultasTerapeutaHoje = pacientes_dados_hoje.consultasLista;
 
     document.getElementById('nome-terapeuta').textContent = dadosTerapeuta.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosTerapeuta.nome;
 
     // Preenche horários
     const horarios = document.getElementById('horarios-lista');
-    if (consultasTerapeutaHoje.length === 0) {
+    if (consultasTerapeuta.length === 0) {
         horarios.innerHTML = '<p class="carregando">Nenhum horário disponível.</p>';
     } else {
-        horarios.innerHTML = consultasTerapeutaHoje.map(h => `
+        horarios.innerHTML = consultasTerapeuta.map(h => `
             <div class="horario-item">
                 <span class="horario-hora">${h.nome} - ${h.hora_consulta}</span>
                 <button class="btn-presente" data-id="${h.id_consulta}">&#9989</button>
@@ -96,7 +92,7 @@ async function init() {
         `).join('');
     }
 
-    // Preenche pacientes atuais (cards)
+    // Preenche pacientes atuais
     const pacientesGrid = document.getElementById('pacientes-grid');
     if (pacientes.length === 0) {
         pacientesGrid.innerHTML = '<p class="carregando">Nenhum paciente cadastrado ainda.</p>';
@@ -105,75 +101,13 @@ async function init() {
             <div class="paciente-card">
                 <div class="paciente-avatar">👦</div>
                 <div class="paciente-nome">${p.nome}</div>
+                <div class="paciente-info">${p.ultimaPresenca}</div>
             </div>
         `).join('');
     }
 
-    // Preenche tabela de pacientes com frequência
-    const tabela = document.getElementById('tabela-pacientes');
-    if (pacientes.length === 0) {
-        tabela.innerHTML = '<tr><td colspan="4" class="carregando">Nenhum paciente cadastrado ainda.</td></tr>';
-    } else {
-        tabela.innerHTML = '<tr><td colspan="4" class="carregando">Carregando frequências...</td></tr>';
-
-        // Monta mapa de última presença por paciente (id_status === 2 = presença, conforme calcFreq do BD)
-        const ultimaPresencaMap = {};
-        for (const consulta of consultasTerapeuta) {
-            if (consulta.id_status === 2) {
-                const dataConsulta = new Date(consulta.data_consulta);
-                const id = consulta.id_paciente;
-                if (!ultimaPresencaMap[id] || dataConsulta > ultimaPresencaMap[id]) {
-                    ultimaPresencaMap[id] = dataConsulta;
-                }
-            }
-        }
-
-        // Busca frequência de todos os pacientes em paralelo
-        const freqMap = await verFreqTodos();
-        console.log('freqMap:', freqMap);
-
-        tabela.innerHTML = pacientes.map(p => {
-            const freq = freqMap[p.id_paciente];
-            const freqValida = freq !== null && !isNaN(freq);
-            const freqDisplay = freqValida ? freq.toFixed(2) : '—';
-
-            const cor = !freqValida ? '#999'
-                : freq >= 90 ? 'var(--verde)'
-                : freq >= 70 ? '#f9a825'
-                : 'var(--vermelho)';
-
-            const badge = !freqValida ? 'badge-cinza'
-                : freq >= 90 ? 'badge-verde'
-                : freq >= 70 ? 'badge-amarelo'
-                : 'badge-vermelho';
-
-            const statusLabel = !freqValida ? 'Sem dados'
-                : freq >= 90 ? 'Regular'
-                : freq >= 70 ? 'Atenção'
-                : 'Irregular';
-
-            const ultimaPresencaDate = ultimaPresencaMap[p.id_paciente];
-            const ultimaPresencaDisplay = ultimaPresencaDate
-                ? ultimaPresencaDate.toLocaleDateString('pt-BR')
-                : 'Sem presença';
-
-            return `
-                <tr>
-                    <td>${p.nome} ${p.sobrenome}</td>
-                    <td>
-                        <span class="barra-mini-container">
-                            <span class="barra-mini" style="width:${freqValida ? freq : 0}%; background-color:${cor};"></span>
-                        </span>
-                        ${freqDisplay}%
-                    </td>
-                    <td>${ultimaPresencaDisplay}</td>
-                    <td><span class="badge ${badge}">${statusLabel}</span></td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    // Event listeners dos botões de presença e ausência
+    // Alterado: event listener agora usa atenderConsulta() no lugar do fetch() avulso
+    // Alterado: id_consulta extraído via data-id em vez de value="/rota?id=..."
     const btnsPresente = document.getElementsByClassName('btn-presente');
     for (const btn of btnsPresente) {
         btn.addEventListener('click', async function () {
@@ -182,6 +116,7 @@ async function init() {
         });
     }
 
+    // Adicionado: event listener do botão ausente que não existia no código original
     const btnsAusente = document.getElementsByClassName('btn-ausente');
     for (const btn of btnsAusente) {
         btn.addEventListener('click', async function () {
@@ -194,6 +129,7 @@ async function init() {
 init();
 
 // ===== SIDEBAR =====
+// Removido: console.log('clicked') que era debug esquecido no closeBtn
 document.addEventListener('DOMContentLoaded', () => {
     const menuBtn = document.getElementById('menu_btn');
     const sidebar = document.getElementById('sidebar');
