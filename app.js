@@ -161,6 +161,54 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
     }
 })
 
+app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
+    try {
+        const user = req.session.usuario;
+        const client = await db.connect();
+
+        let result;
+
+        if (user.tipo === 2) {
+            result = await client.query('SELECT * FROM teadmin.consultas_hoje()');
+        } else if (user.tipo === 1) {
+            result = await client.query('SELECT * FROM teadmin.consultas_hoje($1)', [user.id_profissional]);
+        }
+
+        const consultasRaw = result.rows;
+        const consultasLista = [];
+        const pacientes = [];
+
+        if (consultasRaw.length > 0) {
+            for (const i of consultasRaw) {
+                // Monta lista de pacientes únicos
+                if (!pacientes.some(p => p.id_paciente === i.id_paciente)) {
+                    pacientes.push({
+                        id_paciente: i.id_paciente,
+                        nome: i.nome,
+                        sobrenome: i.sobrenome
+                    });
+                }
+
+                // Monta consultasLista no mesmo formato do send_paciente_dados
+                consultasLista.push({
+                    id_paciente:    i.id_paciente,
+                    nome:           i.nome,
+                    sobrenome:      i.sobrenome,
+                    id_consulta:    i.id_consulta,
+                    id_status:      i.id_status,
+                    hora_consulta:  i.hora_consulta,
+                    data_consulta:  i.data_consulta
+                });
+            }
+        }
+
+        client.release();
+        res.json({ pacientes, consultasLista });
+    } catch (error) {
+        res.send(`Erro: ${error}`);
+    }
+});
+
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
         const id_paciente = req.query.id_paciente;
@@ -172,17 +220,17 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
     }
 })
 
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/login");
+});
+
 ///////////////////////////////////////////
 /////////////// ROTAS POST //////////////// 
 ///////////////////////////////////////////
 
 app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
-});
-
-app.post("/logout", (req, res) => {
-    req.session.destroy();
-    res.redirect("/login");
 });
 
 app.post('/api/agendamentos', async (req, res) => {
