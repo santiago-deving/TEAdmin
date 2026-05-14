@@ -38,10 +38,11 @@ async function sendPacienteDadosHoje() {
 
 async function verFreqTodos() {
     const result = await getData('/ver_freq/todos');
-    // Converte os valores de string pra float igual antes
+    console.log('verFreqTodos result:', result); // ver o que volta
+    if (!result) return {};
     const freqMap = {};
     for (const [id, freq] of Object.entries(result)) {
-        freqMap[id] = freq !== null ? parseFloat(freq) : null;
+        freqMap[String(id)] = freq !== null ? parseFloat(freq) : null;
     }
     return freqMap;
 }
@@ -129,6 +130,7 @@ async function init() {
 
         // Busca frequência de todos os pacientes em paralelo
         const freqMap = await verFreqTodos();
+        console.log('freqMap:', freqMap);
 
         tabela.innerHTML = pacientes.map(p => {
             const freq = freqMap[p.id_paciente];
