@@ -42,8 +42,6 @@
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.sucesso { border-left: 5px solid #4CAF50; }
         .toast.erro { border-left: 5px solid #E76F51; }
-
-        /* MODAL */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -74,7 +72,8 @@
             outline: none;
         }
         .modal-group input:focus, .modal-group select:focus { border-color: var(--azul); }
-        .modal-acoes { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+        .modal-acoes { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .modal-acoes-direita { display: flex; gap: 12px; }
         .btn-confirmar {
             background-color: var(--azul);
             color: #fff;
@@ -85,6 +84,7 @@
             font-weight: 700;
             cursor: pointer;
         }
+        .btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-fechar {
             background: transparent;
             border: 1.5px solid #ddd;
@@ -94,6 +94,18 @@
             cursor: pointer;
             color: #666;
         }
+        .btn-excluir {
+            background: transparent;
+            border: 1.5px solid #E76F51;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #E76F51;
+            font-weight: 600;
+            display: none;
+        }
+        .btn-excluir:hover { background: #E76F51; color: #fff; }
     </style>
 </head>
 <body>
@@ -116,7 +128,6 @@
         </nav>
     </div>
 
-    <!-- MODAL -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal">
             <h3 id="modal-titulo">📅 Agendamento</h3>
@@ -125,21 +136,25 @@
                 <input type="text" id="modal-data" readonly>
             </div>
             <div class="modal-group">
-                <label>Nome do Paciente</label>
-                <input type="text" id="modal-paciente" placeholder="Nome do paciente">
+                <label>Paciente</label>
+                <select id="modal-paciente">
+                    <option value="">Selecione um paciente...</option>
+                </select>
             </div>
             <div class="modal-group">
                 <label>Horário</label>
                 <input type="time" id="modal-hora">
             </div>
             <div class="modal-acoes">
-                <button class="btn-fechar" onclick="fecharModal()">Cancelar</button>
-                <button class="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
+                <button class="btn-excluir" id="btn-excluir" onclick="excluirAgendamento()">🗑 Excluir</button>
+                <div class="modal-acoes-direita">
+                    <button class="btn-fechar" onclick="fecharModal()">Cancelar</button>
+                    <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
         <span>Acessibilidade:</span>
         <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
@@ -149,7 +164,6 @@
         <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
     </div>
 
-    <!-- HEADER -->
     <div class="header">
         <div class="menu_btn" id="menu_btn">
             <i class="bi bi-list"></i>
@@ -163,7 +177,6 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO -->
     <div class="painel-container">
         <div class="card-secao">
             <div class="secao-header">
@@ -183,34 +196,46 @@
         const closeBtn = document.getElementById('closeBtn');
         const overlayEl = document.getElementById('overlay');
 
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.add('aberto');
-            overlayEl.classList.add('ativo');
-        });
-        closeBtn.addEventListener('click', () => {
-            sidebar.classList.remove('aberto');
-            overlayEl.classList.remove('ativo');
-        });
-        overlayEl.addEventListener('click', () => {
-            sidebar.classList.remove('aberto');
-            overlayEl.classList.remove('ativo');
-        });
+        menuBtn.addEventListener('click', () => { sidebar.classList.add('aberto'); overlayEl.classList.add('ativo'); });
+        closeBtn.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
+        overlayEl.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
 
         const hoje = new Date();
         document.getElementById('data-hoje').textContent =
             hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
         let dataSelecionada = '';
+        let idConsultaSelecionada = '';
         let calendarInstance = null;
+        let pacientesCache = [];
 
-        function abrirModal(dateStr) {
+        async function carregarPacientes() {
+            const response = await fetch('/api/pacientes');
+            pacientesCache = await response.json();
+            const select = document.getElementById('modal-paciente');
+            select.innerHTML = '<option value="">Selecione um paciente...</option>';
+            pacientesCache.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id_paciente;
+                opt.textContent = p.nome + ' ' + p.sobrenome;
+                select.appendChild(opt);
+            });
+        }
+
+        carregarPacientes();
+
+        function abrirModal(dateStr, idPaciente = '', hora = '', idConsulta = '') {
             dataSelecionada = dateStr;
+            idConsultaSelecionada = idConsulta;
             const [ano, mes, dia] = dateStr.split('-');
-            document.getElementById('modal-titulo').textContent = '📅 Novo Agendamento';
+            document.getElementById('modal-titulo').textContent = idConsulta ? '📋 Editar Agendamento' : '📅 Novo Agendamento';
             document.getElementById('modal-data').value = `${dia}/${mes}/${ano}`;
-            document.getElementById('modal-paciente').value = '';
-            document.getElementById('modal-hora').value = '';
+            document.getElementById('modal-hora').value = hora;
+            document.getElementById('btn-excluir').style.display = idConsulta ? 'block' : 'none';
             document.getElementById('modal-overlay').classList.add('ativo');
+            setTimeout(() => {
+                document.getElementById('modal-paciente').value = idPaciente;
+            }, 100);
         }
 
         function mostrarToast(msg, tipo = 'sucesso') {
@@ -225,28 +250,52 @@
         }
 
         function confirmarAgendamento() {
-            const paciente = document.getElementById('modal-paciente').value.trim();
+            const id_paciente = document.getElementById('modal-paciente').value;
             const hora = document.getElementById('modal-hora').value;
+            const btn = document.getElementById('btn-confirmar');
 
-            if (!paciente) {
-                mostrarToast('Preencha o nome do paciente!', 'erro');
+            if (!id_paciente) {
+                mostrarToast('Selecione um paciente!', 'erro');
                 return;
             }
 
-            const titulo = hora ? `${hora} - ${paciente}` : paciente;
-            const novoEvento = {
-                title: titulo,
-                start: dataSelecionada + (hora ? 'T' + hora : '')
-            };
+            btn.disabled = true;
 
             fetch('/api/agendamentos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(novoEvento)
-            }).then(() => {
-                calendarInstance.addEvent(novoEvento);
-                fecharModal();
-                mostrarToast('Agendamento salvo!', 'sucesso');
+                body: JSON.stringify({ id_paciente, data: dataSelecionada, hora: hora || null })
+            }).then(res => res.json()).then(data => {
+                btn.disabled = false;
+                if (data.sucesso) {
+                    calendarInstance.refetchEvents();
+                    fecharModal();
+                    mostrarToast('Agendamento salvo!', 'sucesso');
+                } else {
+                    mostrarToast('Erro ao salvar!', 'erro');
+                }
+            }).catch(() => {
+                btn.disabled = false;
+                mostrarToast('Erro de conexão!', 'erro');
+            });
+        }
+
+        function excluirAgendamento() {
+            if (!idConsultaSelecionada) return;
+            if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
+
+            fetch(`/api/agendamentos/${idConsultaSelecionada}`, {
+                method: 'DELETE'
+            }).then(res => res.json()).then(data => {
+                if (data.sucesso) {
+                    calendarInstance.refetchEvents();
+                    fecharModal();
+                    mostrarToast('Agendamento excluído!', 'sucesso');
+                } else {
+                    mostrarToast('Erro ao excluir!', 'erro');
+                }
+            }).catch(() => {
+                mostrarToast('Erro de conexão!', 'erro');
             });
         }
 
@@ -256,30 +305,18 @@
             calendarInstance = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'pt-br',
-                buttonText: {
-                    today: 'Hoje',
-                    month: 'Mês',
-                    week: 'Semana'
-                },
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
+                buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                 events: '/api/agendamentos',
                 dateClick: function (info) {
                     abrirModal(info.dateStr);
                 },
                 eventClick: function (info) {
                     const startStr = info.event.startStr.split('T')[0];
-                    const [ano, mes, dia] = startStr.split('-');
                     const hora = info.event.startStr.includes('T') ? info.event.startStr.split('T')[1].substring(0,5) : '';
-                    dataSelecionada = startStr;
-                    document.getElementById('modal-titulo').textContent = '📅 Editar Agendamento';
-                    document.getElementById('modal-data').value = `${dia}/${mes}/${ano}`;
-                    document.getElementById('modal-paciente').value = info.event.title;
-                    document.getElementById('modal-hora').value = hora;
-                    document.getElementById('modal-overlay').classList.add('ativo');
+                    const idPaciente = info.event.extendedProps.id_paciente || '';
+                    const idConsulta = info.event.id || '';
+                    abrirModal(startStr, idPaciente, hora, idConsulta);
                 }
             });
 

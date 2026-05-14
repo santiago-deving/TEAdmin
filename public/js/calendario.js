@@ -16,7 +16,20 @@ async function userData(route) {
 async function init() {
 
 const dadosUsuario = await userData('/send_user');
-const sessoes = await userData('/send_paciente_dados');
+const pacientes_dados = await userData('/send_paciente_dados');
+
+// transforma no formato que o calendário espera: { "2026-05-12": [{...}] }
+const sessoes = {};
+for (const c of pacientes_dados.consultasLista) {
+    const chave = c.data_consulta.split('T')[0]; // pega só "2026-05-12"
+    if (!sessoes[chave]) sessoes[chave] = [];
+    sessoes[chave].push({
+        hora: c.hora_consulta,
+        nome: c.nome + ' ' + c.sobrenome,
+        tipo: 'Consulta',
+        status: 'agendado'
+    });
+}
 
 const meses = [
     "Janeiro","Fevereiro","Março","Abril","Maio","Junho",

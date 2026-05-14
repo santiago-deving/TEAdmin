@@ -1,4 +1,3 @@
-// const { use } = require('react');
 const db = require('../db');
 
 function verificarLogin(userType) {
@@ -22,33 +21,51 @@ async function validac_login(req, res, next) {
   const client = await db.connect();
 
   try {
-    let user
-    
-    // responsavel = 0
-    // profissional = 1
-    // administrativo = 2
-    // Verifica admin PRIMEIRO
-    user = await client.query("SELECT *, 2 AS tipo FROM teadmin.usuario WHERE email = $1 AND senha = $2", [email, senha]);
+    let user;
 
-if (user.rows.length === 0) {
-  user = await client.query('SELECT *, 0 AS tipo FROM teadmin.responsavel WHERE email = $1 AND senha = $2', [email, senha]);
-      } 
+    user = await client.query(
+      `SELECT id_usuario, login AS email, senha, 2 AS tipo
+       FROM teadmin.usuario 
+       WHERE login = $1 AND senha = $2`,
+      [email, senha]
+    );
 
-      if (user.rows.length === 0) {
-  user = await client.query('SELECT *, 1 AS tipo FROM teadmin.profissional WHERE email = $1 AND senha = $2', [email, senha]);
-      }
+    if (user.rows.length === 0) {
+      user = await client.query(
+        `SELECT id_responsavel, nome, sobrenome, email, senha, 0 AS tipo
+         FROM teadmin.responsavel 
+         WHERE email = $1 AND senha = $2`,
+        [email, senha]
+      );
+    }
 
-if (user.rows.length === 0) {
-  user = await client.query('SELECT *, 2 AS tipo FROM teadmin.recepcionista WHERE email = $1 AND senha = $2', [email, senha]);
-      }
+    if (user.rows.length === 0) {
+      user = await client.query(
+        `SELECT id_profissional, nome, sobrenome, email, senha, 1 AS tipo
+         FROM teadmin.profissional 
+         WHERE email = $1 AND senha = $2`,
+        [email, senha]
+      );
+    }
 
- if (user.rows.length === 0) {
-  return res.send('credenciais inválidas!');
-      }
+    if (user.rows.length === 0) {
+      user = await client.query(
+        `SELECT id_recepcionista, nome, sobrenome, email, senha, 2 AS tipo
+         FROM teadmin.recepcionista 
+         WHERE email = $1 AND senha = $2`,
+        [email, senha]
+      );
+    }
+
+    if (user.rows.length === 0) {
+      return res.send('credenciais inválidas!');
+    }
 
     user = user.rows[0];
 
-    req.session.usuario = user;  // salva o usuario no cookie
+    console.log('USUARIO LOGADO:', user);
+
+    req.session.usuario = user;
 
     return next();
   } catch (error) {
