@@ -255,8 +255,13 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
 
         const freqs = {};
         for (const p of pacientes.rows) {
-            const r = await calcFreq(p.id_paciente, user.tipo === 1 ? user.id_profissional : undefined, { session: { usuario: user } });
-            freqs[p.id_paciente] = r;
+            let result;
+            if (user.tipo === 1) {
+                result = await client.query('SELECT calcfreq($1, $2)', [p.id_paciente, user.id_profissional]);
+            } else if (user.tipo === 2) {
+                result = await client.query('SELECT calcfreq($1)', [p.id_paciente]);
+            }
+            freqs[p.id_paciente] = result.rows[0].calcfreq;
         }
 
         client.release();
