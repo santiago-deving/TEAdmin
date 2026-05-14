@@ -32,8 +32,18 @@ async function sendPacienteDadosHoje() {
 
 // Retorna a frequência de um paciente (string "XX.XX")
 // Espera: "XX.XX"
-async function verFreq(id_paciente) {
-    return await getData(`/ver_freq?id_paciente=${id_paciente}`);
+// async function verFreq(id_paciente) {
+//     return await getData(`/ver_freq?id_paciente=${id_paciente}`);
+// }
+
+async function verFreqTodos() {
+    const result = await getData('/ver_freq/todos');
+    // Converte os valores de string pra float igual antes
+    const freqMap = {};
+    for (const [id, freq] of Object.entries(result)) {
+        freqMap[id] = freq !== null ? parseFloat(freq) : null;
+    }
+    return freqMap;
 }
 
 // Registra presença do paciente na consulta
@@ -118,19 +128,7 @@ async function init() {
         }
 
         // Busca frequência de todos os pacientes em paralelo
-        const freqResultados = await Promise.all(
-            pacientes.map(p =>
-                verFreq(p.id_paciente)
-                    .then(freq => ({ id_paciente: p.id_paciente, freq }))
-                    .catch(() => ({ id_paciente: p.id_paciente, freq: null }))
-            )
-        );
-
-        // Monta mapa de frequência por id_paciente
-        const freqMap = {};
-        for (const r of freqResultados) {
-            freqMap[r.id_paciente] = r.freq !== null ? parseFloat(r.freq) : null;
-        }
+        const freqMap = await verFreqTodos();
 
         tabela.innerHTML = pacientes.map(p => {
             const freq = freqMap[p.id_paciente];
