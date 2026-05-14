@@ -1,9 +1,11 @@
-async function terapeutaData(route) {
+// ===== FUNÇÃO BASE DE FETCH =====
+// Função genérica reutilizável para requisições GET ao backend
+async function getData(route) {
     try {
         const response = await fetch(route);
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
-        } 
+        }
         const result = await response.json();
         return result;
     } catch (error) {
@@ -11,9 +13,51 @@ async function terapeutaData(route) {
     }
 }
 
+// ===== FUNÇÕES ESPECÍFICAS DE CADA ROTA =====
+// Cada função representa uma rota do backend e documenta o que se espera receber
+
+// Retorna os dados do usuário logado
+// Espera: { nome, pacientes[] }
+async function sendUser() {
+    return await getData('send_user');
+}
+
+// Retorna os dados dos pacientes e consultas do terapeuta
+// Espera: { pacientes: [{ nome, ultimaPresenca }], consultasLista: [{ nome, hora_consulta, id_consulta }] }
+async function sendPacienteDados() {
+    return await getData('send_paciente_dados');
+}
+
+// Registra presença do paciente na consulta
+// Espera: { success: true } ou status de erro
+async function atenderConsulta(id_consulta) {
+    try {
+        const response = await fetch(`/atender_consulta?id_consulta=${id_consulta}`, { method: 'POST' });
+        if (!response.ok) throw new Error(`Response status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+// Registra ausência do paciente na consulta
+// Espera: { success: true } ou status de erro
+// Adicionado: o botão de ausência existia no HTML mas não tinha função de fetch correspondente
+async function ausenciaConsulta(id_consulta) {
+    try {
+        const response = await fetch(`/ausencia_consulta?id_consulta=${id_consulta}`, { method: 'POST' });
+        if (!response.ok) throw new Error(`Response status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+// ===== INIT =====
 async function init() {
-    const dadosTerapeuta = await terapeutaData('send_user');
-    const pacientes_dados = await terapeutaData('send_paciente_dados');
+    // Alterado: chamadas diretas à rota substituídas pelas funções específicas
+    const dadosTerapeuta = await sendUser();
+    const pacientes_dados = await sendPacienteDados();
 
     const pacientes = pacientes_dados.pacientes;
     const consultasTerapeuta = pacientes_dados.consultasLista;
@@ -28,16 +72,16 @@ async function init() {
     } else {
         horarios.innerHTML = consultasTerapeuta.map(h => `
             <div class="horario-item">
-                <span class="horario-hora">${h.nome}`+` - ${h.hora_consulta}</span>
-                <button class="btn-presente" value="/atender_consulta?id_consulta=${h.id_consulta}">&#9989</button>
-                <button class="btn-ausente" value="/ausencia_consulta?id_consulta=${h.id_consulta}">&#10060</button>
+                <span class="horario-hora">${h.nome} - ${h.hora_consulta}</span>
+                <button class="btn-presente" data-id="${h.id_consulta}">&#9989</button>
+                <button class="btn-ausente" data-id="${h.id_consulta}">&#10060</button>
             </div>
         `).join('');
     }
 
     // Preenche pacientes atuais
     const pacientesGrid = document.getElementById('pacientes-grid');
-    if (dadosTerapeuta.pacientes.length === 0) {
+    if (pacientes.length === 0) {
         pacientesGrid.innerHTML = '<p class="carregando">Nenhum paciente cadastrado ainda.</p>';
     } else {
         pacientesGrid.innerHTML = pacientes.map(p => `
@@ -49,72 +93,48 @@ async function init() {
         `).join('');
     }
 
-    // event listener do botão de presença
+    // Alterado: event listener agora usa atenderConsulta() no lugar do fetch() avulso
+    // Alterado: id_consulta extraído via data-id em vez de value="/rota?id=..."
     const btnsPresente = document.getElementsByClassName('btn-presente');
-
     for (const btn of btnsPresente) {
-        btn.addEventListener('click', async function() {
-            try {
-                const response = await fetch(this.value, { method: 'POST' });
-                if (!response.ok) throw new Error(`Response status: ${response.status}`);
-                const result = await response.json();
-                console.log(result);
-            } catch (error) {
-                console.error(error.message);
-            }
+        btn.addEventListener('click', async function () {
+            const resultado = await atenderConsulta(this.dataset.id);
+            console.log(resultado);
+        });
+    }
+
+    // Adicionado: event listener do botão ausente que não existia no código original
+    const btnsAusente = document.getElementsByClassName('btn-ausente');
+    for (const btn of btnsAusente) {
+        btn.addEventListener('click', async function () {
+            const resultado = await ausenciaConsulta(this.dataset.id);
+            console.log(resultado);
         });
     }
 }
 
 init();
 
-document.addEventListener("DOMContentLoaded",()=>{
+// ===== SIDEBAR =====
+// Removido: console.log('clicked') que era debug esquecido no closeBtn
+document.addEventListener('DOMContentLoaded', () => {
+    const menuBtn = document.getElementById('menu_btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
 
-const sidebarBtn = document.getElementById("menu_btn");
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-const closeBtn = document.getElementById('closeBtn');
+    menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
 
-sidebarBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
+    overlay.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('aberto');
+        overlay.classList.toggle('ativo');
+    });
 });
-
-overlay.addEventListener('click', ()=>{
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
-})
-
-closeBtn.addEventListener('click', ()=>{
-    console.log('clicked');
-    sidebar.classList.toggle('aberto');
-    overlay.classList.toggle('ativo');
-})
-})
-
-
-// Preenche tabela de pacientes
-// const tabela     = document.getElementById('tabela-pacientes');
-// if (dadosTerapeuta.pacientes.length === 0) {
-//     tabela.innerHTML = '<tr><td colspan="4" class="carregando">Nenhum paciente cadastrado ainda.</td></tr>';
-// } else {
-//     tabela.innerHTML = dadosTerapeuta.pacientes.map(p => {
-//         const cor = p.frequencia >= 90 ? 'var(--verde)' : p.frequencia >= 70 ? '#f9a825' : 'var(--vermelho)';
-//         const badge = p.frequencia >= 90 ? 'badge-verde' : p.frequencia >= 70 ? 'badge-amarelo' : 'badge-vermelho';
-//         return `
-//             <tr>
-//                 <td>${p.nome}</td>
-//                 <td>
-//                     <span class="barra-mini-container">
-//                         <span class="barra-mini" style="width:${p.frequencia}%; background-color:${cor};"></span>
-//                     </span>
-//                     ${p.frequencia}%
-//                 </td>
-//                 <td>${p.ultimaPresenca}</td>
-//                 <td><span class="badge ${badge}">${p.status}</span></td>
-//             </tr>
-//         `;
-//     }).join('');
-// }
-
-
