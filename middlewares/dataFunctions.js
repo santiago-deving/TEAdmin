@@ -21,6 +21,7 @@ async function calcFreq(id_paciente, id_profissional, req) {
     }
 
     const freq = result.rows[0].calcfreq;
+
     client.release();
     return freq;
 }
