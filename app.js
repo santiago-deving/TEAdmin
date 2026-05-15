@@ -216,26 +216,18 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
 
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
+        console.log('QUERY:', req.query);
+
         const id_paciente = Number(req.query.id_paciente);
 
         const id_profissional = req.query.id_profissional
             ? Number(req.query.id_profissional)
             : null;
 
-        if (Number.isNaN(id_paciente)) {
-            return res.status(400).json({
-                erro: 'id_paciente inválido'
-            });
-        }
-
-        if (
-            id_profissional !== null &&
-            Number.isNaN(id_profissional)
-        ) {
-            return res.status(400).json({
-                erro: 'id_profissional inválido'
-            });
-        }
+        console.log({
+            id_paciente,
+            id_profissional
+        });
 
         const frequencia = await calcFreq(
             id_paciente,
@@ -243,10 +235,12 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
             req
         );
 
+        console.log('FREQ:', frequencia);
+
         return res.json({ frequencia });
 
     } catch (error) {
-        console.error(error);
+        console.error('ERRO VER_FREQ:', error);
 
         return res.status(500).json({
             erro: String(error)
