@@ -211,14 +211,49 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
 
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
-        const id_paciente = req.query.id_paciente;
-        const id_profissional = req.query.id_profissional;
+        const id_paciente = parseInt(req.query.id_paciente);
+        const id_profissional = parseInt(req.query.id_profissional);
         const frequencia = await calcFreq(id_paciente, id_profissional, req);
         return res.json(frequencia);
     } catch (error) {
         res.send(`Erro: ${error}`);
     }
 })
+
+app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
+    try {
+        const user = req.session.usuario;
+        const tipo = parseInt(user.tipo); // garante número
+        const client = await db.connect();
+
+        let pacientes;
+        if (tipo === 1) {
+            pacientes = await client.query(
+                'SELECT DISTINCT id_paciente FROM teadmin.consulta WHERE id_profissional = $1',
+                [user.id_profissional]
+            );
+        } else if (tipo === 2) {
+            pacientes = await client.query('SELECT DISTINCT id_paciente FROM teadmin.consulta');
+        }
+
+        const freqs = {};
+        for (const p of pacientes.rows) {
+            let result;
+            if (tipo === 1) {
+                result = await client.query('SELECT calcfreq($1, $2)', [p.id_paciente, user.id_profissional]);
+            } else if (tipo === 2) {
+                result = await client.query('SELECT calcfreq($1)', [p.id_paciente]);
+            }
+            freqs[String(p.id_paciente)] = result.rows[0].calcfreq;
+        }
+
+        client.release();
+        res.json(freqs);
+    } catch (error) {
+        console.error('Erro /ver_freq/todos:', error);
+        res.status(500).json({ erro: error.message }); // retorna JSON mesmo no erro
+    }
+});
 
 app.get("/logout", (req, res) => {
     req.session.destroy();

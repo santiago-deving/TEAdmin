@@ -3,6 +3,9 @@ const db = require('../db');
 async function calcFreq(id_paciente, id_profissional, req) {
     const usuario = req.session.usuario;
     const client = await db.connect();
+
+    console.log(usuario);
+
     let result;
 
     if (usuario.tipo === 0 && id_profissional === undefined) {
@@ -21,7 +24,5 @@ async function calcFreq(id_paciente, id_profissional, req) {
     client.release();
     return freq;
 }
-
-
 
 module.exports = {calcFreq}
