@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require("express-session");
+// const pgSession = require("connect-pg-simple")(session);
 var bodyParser = require('body-parser');
 const path = require('path');
 
@@ -8,8 +9,12 @@ require("dotenv").config();
 const app = express();
 const db = require("./db");
 const { verificarLogin, validac_login } = require("./middlewares/auth");
-const port = process.env.PORT || 3000;
+const { calcFreq } = require('./middlewares/dataFunctions');
+const port = process.env.PORT || 3000 ;
 
+const e = require('express');
+
+app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
 
@@ -19,15 +24,17 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(session({
-    secret: 'grupo12',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
-        secure: false,
-        maxAge: 24 * 60 * 60 * 1000,
+        secure: isProduction,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: isProduction ? 'none' : 'lax'
     }
 }));
 
@@ -36,42 +43,43 @@ app.use(session({
 ///////////////////////////////////////////
 
 app.get("/", (req, res) => {
+    
     if (!req.session || !req.session.usuario) {
         return res.redirect("/login");
     }
 
     let usuario = req.session.usuario;
-
+    
     if (usuario.tipo === 0) {
-        res.redirect('/painel_pais');
-    }
+        res.redirect('/painel_pais')
+    } 
     if (usuario.tipo === 1) {
         res.redirect('/painel_terapeutas');
-    }
+    } 
     if (usuario.tipo === 2) {
-        res.redirect('/painel_admin');
+        res.redirect('/painel_admin')
     }
 });
 
 app.get("/login", (req, res) => {
     if (req.session.usuario) {
-        res.redirect('/');
+        res.redirect('/')
     } else {
         res.render('login');
     }
 });
 
-app.get("/painel_admin", verificarLogin([2]), (req, res) => {
+app.get("/painel_admin", verificarLogin([2]),(req, res) => {
     res.render('painel-admin');
 });
 
-app.get("/painel_pais", verificarLogin([0]), (req, res) => {
+app.get("/painel_pais", verificarLogin([0]) ,(req, res) => {
     res.render('painel-pais');
 });
 
 app.get('/painel_terapeutas', verificarLogin([1]), (req, res) => {
     console.log(req.session.usuario);
-    res.render('painel-terapeuta', { user: req.session.usuario });
+    res.render('painel-terapeuta', {user: req.session.usuario});
 });
 
 app.get("/calendario", (req, res) => {
@@ -86,34 +94,52 @@ app.get("/cadastro-responsavel", verificarLogin([2]), (req, res) => {
     res.render('cadastro-responsavel');
 });
 
-app.get('/send_user', (req, res) => {
-    res.send(req.session.usuario);
-});
+app.get("/pacientes", verificarLogin, async (req, res) => {
+    try {
+        const client = await db.connect();
+        const result = await client.query('SELECT * FROM teadmin.pacientes');
+        console.log(result.rows);
+        client.release();
 
-app.get('/send_paciente_dados', verificarLogin(), async (req, res) => {
+        const eventos = result.rows.map(c => ({
+        title: c.nome + ' ' + c.sobrenome,
+        start: c.data_consulta
+    }));
+
+        res.json(eventos);
+    } catch (e) {
+        console.log(e)
+    }
+    
+})
+
+app.get('/send_user', (req, res) => {
+  res.send(req.session.usuario);
+})
+
+app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
+    const client = await db.connect();
     try {
         let user = req.session.usuario;
-        const client = await db.connect();
-
         var result = {};
 
         if (user.tipo === 2) {
             result = await client.query(`SELECT * FROM teadmin.consulta ORDER BY data_consulta`);
         } if (user.tipo === 1) {
-            result = await client.query(`SELECT * FROM teadmin.consulta WHERE id_profissional = $1 ORDER BY data_consulta`, [user.id_profissional]);
+            result = await client.query(`SELECT * FROM teadmin.consulta where id_profissional = ${user.id_profissional} ORDER BY data_consulta`);
         } if (user.tipo === 0) {
             let id_pacienteRaw = await client.query('SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1', [user.id_responsavel]);
             let id_paciente = id_pacienteRaw.rows[0].id_paciente;
-            result = await client.query('SELECT * FROM teadmin.consulta WHERE id_paciente = $1', [id_paciente]);
+            result = await client.query('SELECT * FROM teadmin.consulta where id_paciente = $1', [id_paciente]);
         }
-
+        
         let consultasRaw = result.rows;
         let consultasLista = [];
         let pacientes = [];
 
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
-                let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1`, [i.id_paciente]);
+                let paciente = await client.query(`SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes where id_paciente = ${i.id_paciente}`);
                 paciente = paciente.rows[0];
 
                 if (!pacientes.some(p => p.id_paciente === paciente.id_paciente)) {
@@ -128,86 +154,191 @@ app.get('/send_paciente_dados', verificarLogin(), async (req, res) => {
             }
         }
 
-        let pacientes_dados = { pacientes: pacientes, consultasLista: consultasLista };
-        console.log(pacientes_dados);
-        client.release();
+        let pacientes_dados = {pacientes: pacientes, consultasLista: consultasLista}
 
         res.send(pacientes_dados);
     } catch (error) {
-        res.send(`Erro: ${error}`);
-    }
-});
-
-// Retorna pacientes para o modal do calendário
-// Terapeuta vê só seus pacientes, admin vê todos
-app.get('/api/pacientes', verificarLogin([1, 2]), async (req, res) => {
-    try {
-        const client = await db.connect();
-        let result;
-
-        if (req.session.usuario.tipo === 1) {
-            result = await client.query(`
-                SELECT DISTINCT p.id_paciente, p.nome, p.sobrenome
-                FROM teadmin.pacientes p
-                JOIN teadmin.consulta c ON c.id_paciente = p.id_paciente
-                WHERE c.id_profissional = $1
-                ORDER BY p.nome
-            `, [req.session.usuario.id_profissional]);
-        } else {
-            result = await client.query(`
-                SELECT id_paciente, nome, sobrenome
-                FROM teadmin.pacientes
-                ORDER BY nome
-            `);
-        }
-
+        res.send(`Erro: ${error}`)
+    } finally {
         client.release();
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ erro: error.message });
     }
-});
+})
 
-// Retorna consultas para o FullCalendar
-// Terapeuta vê só as suas, admin vê todas
-app.get('/api/agendamentos', verificarLogin([1, 2]), async (req, res) => {
+app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
+    const client = await db.connect();
     try {
-        const client = await db.connect();
+        const user = req.session.usuario;
+        const id_profissional = user.id_profissional;
+
         let result;
 
-        if (req.session.usuario.tipo === 1) {
-            result = await client.query(`
-                SELECT c.id_consulta, c.data_consulta, c.hora_consulta,
-                       p.nome, p.sobrenome, c.id_paciente
-                FROM teadmin.consulta c
-                JOIN teadmin.pacientes p ON c.id_paciente = p.id_paciente
-                WHERE c.id_profissional = $1
-                ORDER BY c.data_consulta, c.hora_consulta
-            `, [req.session.usuario.id_profissional]);
-        } else {
-            result = await client.query(`
-                SELECT c.id_consulta, c.data_consulta, c.hora_consulta,
-                       p.nome, p.sobrenome, c.id_paciente
-                FROM teadmin.consulta c
-                JOIN teadmin.pacientes p ON c.id_paciente = p.id_paciente
-                ORDER BY c.data_consulta, c.hora_consulta
-            `);
+        if (user.tipo === 2) {
+            result = await client.query('SELECT * FROM teadmin.consultas_hoje()');
+        } else if (user.tipo === 1) {
+            result = await client.query('SELECT * FROM teadmin.consultas_hoje($1)', [user.id_profissional]);
         }
 
-        const eventos = result.rows.map(c => ({
-            id: c.id_consulta,
-            title: c.nome + ' ' + c.sobrenome,
-            start: c.data_consulta.toISOString().split('T')[0] + 'T' + c.hora_consulta,
-            extendedProps: {
-                id_paciente: c.id_paciente
+        let consultasRaw = result.rows;
+        let consultasLista = [];
+        let pacientes = [];
+
+        if (consultasRaw.length > 0) {
+            for (const i of consultasRaw) {
+                // Monta lista de pacientes únicos
+                if (!pacientes.some(p => p.id_paciente === i.id_paciente)) {
+                    pacientes.push({
+                        id_paciente: i.id_paciente,
+                        nome: i.nome,
+                        sobrenome: i.sobrenome
+                    });
+                }
+
+                // Monta consultasLista no mesmo formato do send_paciente_dados
+                consultasLista.push({
+                    id_paciente:    i.id_paciente,
+                    nome:           i.nome,
+                    sobrenome:      i.sobrenome,
+                    id_consulta:    i.id_consulta,
+                    id_status:      i.id_status,
+                    hora_consulta:  i.hora_consulta,
+                    data_consulta:  i.data_consulta
+                });
             }
-        }));
+        }
 
-        client.release();
-        res.json(eventos);
+        res.send({ "pacientes" : pacientes, "consultasLista" : consultasLista });
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.send(`Erro: ${error}`);
+    } finally {
+        client.release();
     }
+});
+
+app.get('/send_dados_terapeutas', async (req, res) => {
+    const client = await db.connect();
+    try {
+        let terapeutas = await client.query('SELECT * FROM profissional');
+        terapeutas = terapeutas.rows;
+
+        let consultasLista = [];
+
+        for (const terapeuta of terapeutas) {
+            const consultas = await client.query(
+                'SELECT * FROM consulta WHERE id_profissional = $1',
+                [terapeuta.id_profissional]
+            );
+
+            const consultasComNome = [];
+            for (const c of consultas.rows) {
+                const paciente = await client.query(
+                    'SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1',
+                    [c.id_paciente]
+                );
+
+                consultasComNome.push({
+                    ...c,
+                    nome:      paciente.rows[0]?.nome,
+                    sobrenome: paciente.rows[0]?.sobrenome
+                });
+            }
+
+            consultasLista = consultasComNome;
+        }
+
+        res.json({ terapeutas, consultasLista });
+
+    } catch (error) {
+        res.send(`Erro: ${error}`);
+    } finally {
+        client.release();
+    }
+});
+
+app.get('/ver_freq', verificarLogin(), async (req, res) => {
+    try {
+        console.log('QUERY:', req.query);
+
+        const id_paciente = Number(req.query.id_paciente);
+
+        const id_profissional = req.query.id_profissional
+            ? Number(req.query.id_profissional)
+            : null;
+
+        console.log({
+            id_paciente,
+            id_profissional
+        });
+
+        const frequencia = await calcFreq(
+            id_paciente,
+            id_profissional,
+            req
+        );
+
+        console.log('FREQ:', frequencia);
+
+        return res.json({ frequencia });
+
+    } catch (error) {
+        console.error('ERRO VER_FREQ:', error);
+
+        return res.status(500).json({
+            erro: String(error)
+        });
+    }
+});
+
+app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
+    const client = await db.connect();
+    try {
+        const user = req.session.usuario;
+        const tipo = parseInt(user.tipo);
+
+        let pacientes;
+        if (tipo === 1) {
+            pacientes = await client.query(
+                'SELECT DISTINCT id_paciente FROM teadmin.consulta WHERE id_profissional = $1',
+                [user.id_profissional]
+            );
+        } else if (tipo === 2) {
+            pacientes = await client.query(
+                'SELECT DISTINCT id_paciente FROM teadmin.consulta'
+            );
+        } else {
+            return res.status(403).json({ erro: 'Acesso não permitido' });
+        }
+
+        const freqs = {};
+        for (const p of pacientes.rows) {
+            let result;
+            if (tipo === 1) {
+                result = await client.query(
+                    'SELECT teadmin.calcfreq($1, $2)', 
+                    [p.id_paciente, user.id_profissional]
+                );
+            } else {
+                result = await client.query(
+                    'SELECT teadmin.calcfreq($1)', 
+                    [p.id_paciente]
+                );
+            }
+            // Pega o valor da primeira coluna, independente do nome
+            const row = result.rows[0];
+            freqs[String(p.id_paciente)] = row[Object.keys(row)[0]];
+        }
+
+        res.json(freqs);
+    } catch (error) {
+        console.error('Erro /ver_freq/todos:', error);
+        res.status(500).json({ erro: error.message });
+    } finally {
+        client.release(); // sempre libera, com erro ou sem
+    }
+});
+
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/login");
 });
 
 ///////////////////////////////////////////
@@ -218,73 +349,32 @@ app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
 
-app.get("/logout", (req, res) => {
-    req.session.destroy();
-    res.redirect("/login");
-});
-
-// Cria novo agendamento
-app.post('/api/agendamentos', verificarLogin([1, 2]), async (req, res) => {
-    try {
-        const { id_paciente, data, hora } = req.body;
-        const id_profissional = req.session.usuario.id_profissional;
-        const client = await db.connect();
-
-        await client.query(`
-            INSERT INTO teadmin.consulta 
-            (id_paciente, id_profissional, id_recepcionista, id_status, data_consulta, hora_consulta)
-            VALUES ($1, $2, 1, 1, $3, $4)
-        `, [id_paciente, id_profissional, data, hora]);
-
-        client.release();
-        res.json({ sucesso: true });
-    } catch (error) {
-        console.log(error);
-        res.json({ sucesso: false, erro: error.message });
-    }
-});
+app.post('/api/agendamentos', async (req, res) => {
+  res.send('Sucesso!');
+})
 
 ///////////////////////////////////////////
 /////////////// ROTAS PUT //////////////// 
 ///////////////////////////////////////////
 
-app.put('/atender_consulta', verificarLogin([1, 2]), async function (req, res) {
+app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
     try {
         let id_consulta = req.query.id_consulta;
         console.log(id_consulta);
         const client = await db.connect();
-        await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
+        const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
+
         client.release();
+
         res.send('Sucesso!');
-    } catch (error) {
+    } catch(error) {
         console.log(error);
     }
-});
 
-///////////////////////////////////////////
-////////////// ROTAS DELETE /////////////// 
-///////////////////////////////////////////
-
-// Exclui agendamento
-app.delete('/api/agendamentos/:id', verificarLogin([1, 2]), async (req, res) => {
-    try {
-        const id_consulta = req.params.id;
-        const client = await db.connect();
-
-        await client.query(`
-            DELETE FROM teadmin.consulta WHERE id_consulta = $1
-        `, [id_consulta]);
-
-        client.release();
-        res.json({ sucesso: true });
-    } catch (error) {
-        console.log(error);
-        res.json({ sucesso: false, erro: error.message });
-    }
 });
 
 //////////////////////////////////////////
 
-app.listen(port, () => {
+app.listen(port, ()=>{
     console.log(`Express rodando na em: http://localhost:${port}`);
 });

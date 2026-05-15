@@ -1,133 +1,136 @@
-// Futuramente as sessões virão do backend
+// ----- Sidebar -----
+const menuBtn   = document.getElementById('menu_btn');
+const sidebar   = document.getElementById('sidebar');
+const closeBtn  = document.getElementById('closeBtn');
+const overlayEl = document.getElementById('overlay');
 
-async function userData(route) {
+menuBtn.addEventListener('click',  () => { sidebar.classList.add('aberto');    overlayEl.classList.add('ativo'); });
+closeBtn.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
+overlayEl.addEventListener('click',() => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
+
+// ----- Data de hoje -----
+const hoje = new Date();
+document.getElementById('data-hoje').textContent =
+    hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+// ----- Modal -----
+let dataSelecionada  = '';
+let calendarInstance = null;
+
+function abrirModal(dateStr) {
+    dataSelecionada = dateStr;
+    const [ano, mes, dia] = dateStr.split('-');
+    document.getElementById('modal-titulo').textContent = '📅 Novo Agendamento';
+    document.getElementById('modal-data').value         = `${dia}/${mes}/${ano}`;
+    document.getElementById('modal-paciente').value     = '';
+    document.getElementById('modal-hora').value         = '';
+    document.getElementById('modal-overlay').classList.add('ativo');
+}
+
+function fecharModal() {
+    document.getElementById('modal-overlay').classList.remove('ativo');
+}
+
+function mostrarToast(msg, tipo = 'sucesso') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `toast ${tipo} show`;
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function confirmarAgendamento() {
+    const paciente = document.getElementById('modal-paciente').value.trim();
+    const hora     = document.getElementById('modal-hora').value;
+    if (!paciente) { mostrarToast('Preencha o nome do paciente!', 'erro'); return; }
+
+    const titulo     = hora ? `${hora} - ${paciente}` : paciente;
+    const novoEvento = { title: titulo, start: dataSelecionada + (hora ? 'T' + hora : '') };
+
+    calendarInstance.addEvent(novoEvento);
+    fecharModal();
+    mostrarToast('Agendamento salvo!', 'sucesso');
+}
+
+// ----- Fetch -----
+async function getData(route) {
     try {
         const response = await fetch(route);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        } 
-        const result = await response.json();
-        return result;
+        if (!response.ok) throw new Error(`Response status: ${response.status}`);
+        return await response.json();
     } catch (error) {
         console.error(error.message);
     }
 }
 
-async function init() {
+// ----- Init -----
+document.addEventListener('DOMContentLoaded', async function () {
+    const dadosUsuario  = await getData('/send_user');
+    const dadosPaciente = await getData('/send_paciente_dados');
+    const consultas     = dadosPaciente?.consultasLista ?? [];
 
-const dadosUsuario = await userData('/send_user');
-const pacientes_dados = await userData('/send_paciente_dados');
+    const statusMap = {
+        1: { cor: '#7EC8E3', label: 'Agendado'  },
+        2: { cor: '#4CAF50', label: 'Concluído'  },
+        3: { cor: '#E76F51', label: 'Cancelado'  }
+    };
 
-// transforma no formato que o calendário espera: { "2026-05-12": [{...}] }
-const sessoes = {};
-for (const c of pacientes_dados.consultasLista) {
-    const chave = c.data_consulta.split('T')[0]; // pega só "2026-05-12"
-    if (!sessoes[chave]) sessoes[chave] = [];
-    sessoes[chave].push({
-        hora: c.hora_consulta,
-        nome: c.nome + ' ' + c.sobrenome,
-        tipo: 'Consulta',
-        status: 'agendado'
+    let terapeutaMap = {};
+    if (dadosUsuario?.tipo === 2) {
+        const dadosTerapeutas = await getData('/send_dados_terapeutas');
+        (dadosTerapeutas?.terapeutas ?? []).forEach(t => {
+            terapeutaMap[t.id_profissional] = t.nome;
+        });
+    }
+
+    const eventos = consultas.map(c => {
+        const nomeEvento = dadosUsuario?.tipo === 2
+            ? `${c.hora_consulta.slice(0,5)} - ${c.nome} ${c.sobrenome} (${terapeutaMap[c.id_profissional] ?? 'Terapeuta'})`
+            : `${c.hora_consulta.slice(0,5)} - ${c.nome} ${c.sobrenome}`;
+
+        return {
+            title:           nomeEvento,
+            start:           `${c.data_consulta.slice(0,10)}T${c.hora_consulta}`,
+            backgroundColor: statusMap[c.id_status]?.cor ?? '#7EC8E3',
+            borderColor:     statusMap[c.id_status]?.cor ?? '#7EC8E3',
+            extendedProps: {
+                id_paciente:     c.id_paciente,
+                id_consulta:     c.id_consulta,
+                id_profissional: c.id_profissional,
+                status:          statusMap[c.id_status]?.label ?? '',
+                nome:            `${c.nome} ${c.sobrenome}`,
+                hora:            c.hora_consulta.slice(0,5),
+                terapeuta:       terapeutaMap[c.id_profissional] ?? ''
+            }
+        };
     });
-}
 
-const meses = [
-    "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-    "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-];
+    const calendarEl = document.getElementById('calendar');
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale:      'pt-br',
+        buttonText:  { today: 'Hoje', month: 'Mês', week: 'Semana' },
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  ''
+        },
+        events: eventos,
 
-let dataAtual = new Date();
-let mesSelecionado = dataAtual.getMonth();
-let anoSelecionado = dataAtual.getFullYear();
-let diaSelecionado = null;
+        dateClick: function (info) {
+            abrirModal(info.dateStr);
+        },
 
-function renderizarCalendario() {
-    document.getElementById('mes-ano').textContent =
-        `${meses[mesSelecionado]} ${anoSelecionado}`;
-
-    const grid = document.getElementById('cal-grid');
-    grid.innerHTML = '';
-
-    const primeiroDia = new Date(anoSelecionado, mesSelecionado, 1).getDay();
-    const totalDias = new Date(anoSelecionado, mesSelecionado + 1, 0).getDate();
-    const hoje = new Date();
-
-    for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement('div');
-        vazio.classList.add('cal-dia', 'vazio');
-        grid.appendChild(vazio);
-    }
-
-    for (let d = 1; d <= totalDias; d++) {
-        const div = document.createElement('div');
-        div.classList.add('cal-dia');
-        div.textContent = d;
-
-        const chave = `${anoSelecionado}-${String(mesSelecionado+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-
-        if (
-            d === hoje.getDate() &&
-            mesSelecionado === hoje.getMonth() &&
-            anoSelecionado === hoje.getFullYear()
-        ) {
-            div.classList.add('hoje');
+        eventClick: function (info) {
+            const startStr        = info.event.startStr.split('T')[0];
+            const [ano, mes, dia] = startStr.split('-');
+            dataSelecionada       = startStr;
+            document.getElementById('modal-titulo').textContent = '📅 Consulta';
+            document.getElementById('modal-data').value         = `${dia}/${mes}/${ano}`;
+            document.getElementById('modal-paciente').value     = info.event.extendedProps.nome;
+            document.getElementById('modal-hora').value         = info.event.extendedProps.hora;
+            document.getElementById('modal-overlay').classList.add('ativo');
         }
+    });
 
-        if (sessoes[chave]) {
-            div.classList.add('tem-sessao');
-        }
-
-        if (diaSelecionado === chave) {
-            div.classList.add('selecionado');
-        }
-
-        div.addEventListener('click', () => selecionarDia(chave, d));
-        grid.appendChild(div);
-    }
-}
-
-function selecionarDia(chave, dia) {
-    diaSelecionado = chave;
-    renderizarCalendario();
-
-    document.getElementById('data-selecionada').textContent =
-        `${dia} de ${meses[mesSelecionado]} de ${anoSelecionado}`;
-
-    const agendaDiv = document.getElementById('agenda-dia');
-    const sessoesNoDia = sessoes[chave];
-
-    if (!sessoesNoDia || sessoesNoDia.length === 0) {
-        agendaDiv.innerHTML = '<p class="carregando">Nenhuma sessão agendada para este dia.</p>';
-        return;
-    }
-
-    agendaDiv.innerHTML = sessoesNoDia.map((s, i) => `
-        <div class="sessao-item">
-            <span class="sessao-hora">${s.hora}</span>
-            <div class="sessao-info">
-                <div class="sessao-nome">${s.nome}</div>
-                <div class="sessao-tipo">${s.tipo}</div>
-            </div>
-            <span class="sessao-status status-${s.status}">
-                ${s.status === 'agendado' ? 'Agendado' : s.status === 'concluido' ? 'Concluído' : 'Falta'}
-            </span>
-        </div>
-    `).join('');
-}
-
-function mudarMes(direcao) {
-    mesSelecionado += direcao;
-    if (mesSelecionado < 0) { mesSelecionado = 11; anoSelecionado--; }
-    if (mesSelecionado > 11) { mesSelecionado = 0; anoSelecionado++; }
-    diaSelecionado = null;
-    document.getElementById('agenda-dia').innerHTML =
-        '<p class="carregando">Selecione um dia no calendário.</p>';
-    document.getElementById('data-selecionada').textContent = '...';
-    renderizarCalendario();
-}
-
-renderizarCalendario();
-    
-}
-
-init();
+    calendarInstance.render();
+});

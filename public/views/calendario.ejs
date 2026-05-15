@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="/css/global.css"/>
     <link rel="stylesheet" href="/css/calendario.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
@@ -18,94 +19,54 @@
         .fc-button-active { background-color: var(--azul) !important; color: #fff !important; }
         .fc-daygrid-day-number { color: var(--cinza-texto); }
         .fc-col-header-cell-cushion { color: var(--azul); font-weight: 700; font-size: 0.78rem; }
-        .fc-event { background-color: var(--azul) !important; border: none !important; border-radius: 6px !important; padding: 2px 6px !important; cursor: pointer; }
+        .fc-event { border-radius: 6px !important; padding: 2px 6px !important; cursor: pointer; }
         .fc-event-title { font-size: 0.78rem; font-weight: 600; }
         .fc-day-today { background-color: rgba(46, 134, 171, 0.08) !important; }
         .painel-container { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
         .toast {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            background: #222;
-            color: #fff;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            position: fixed; bottom: 32px; right: 32px;
+            background: #222; color: #fff;
+            padding: 14px 24px; border-radius: 12px;
+            font-size: 0.9rem; font-weight: 600;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            opacity: 0;
-            transform: translateY(20px);
+            opacity: 0; transform: translateY(20px);
             transition: all 0.3s ease;
-            z-index: 9999;
-            pointer-events: none;
+            z-index: 9999; pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.sucesso { border-left: 5px solid #4CAF50; }
-        .toast.erro { border-left: 5px solid #E76F51; }
+        .toast.erro    { border-left: 5px solid #E76F51; }
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
+            z-index: 2000; justify-content: center; align-items: center;
         }
         .modal-overlay.ativo { display: flex; }
         .modal {
-            background: #fff;
-            border-radius: 16px;
-            padding: 32px;
-            width: 400px;
-            max-width: 90%;
+            background: #fff; border-radius: 16px;
+            padding: 32px; width: 400px; max-width: 90%;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
         .modal h3 { color: var(--azul); margin-bottom: 20px; font-size: 1.1rem; }
         .modal-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
         .modal-group label { font-size: 0.82rem; font-weight: 700; color: #666; text-transform: uppercase; }
         .modal-group input, .modal-group select {
-            padding: 10px 14px;
-            border: 1.5px solid #ddd;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            outline: none;
+            padding: 10px 14px; border: 1.5px solid #ddd;
+            border-radius: 10px; font-size: 0.9rem; outline: none;
         }
         .modal-group input:focus, .modal-group select:focus { border-color: var(--azul); }
-        .modal-acoes { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-        .modal-acoes-direita { display: flex; gap: 12px; }
+        .modal-acoes { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
         .btn-confirmar {
-            background-color: var(--azul);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 24px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
+            background-color: var(--azul); color: #fff; border: none;
+            border-radius: 10px; padding: 10px 24px;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer;
         }
-        .btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-fechar {
-            background: transparent;
-            border: 1.5px solid #ddd;
-            border-radius: 10px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            color: #666;
+            background: transparent; border: 1.5px solid #ddd;
+            border-radius: 10px; padding: 10px 20px;
+            font-size: 0.9rem; cursor: pointer; color: #666;
         }
-        .btn-excluir {
-            background: transparent;
-            border: 1.5px solid #E76F51;
-            border-radius: 10px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            color: #E76F51;
-            font-weight: 600;
-            display: none;
-        }
-        .btn-excluir:hover { background: #E76F51; color: #fff; }
     </style>
 </head>
 <body>
@@ -128,6 +89,7 @@
         </nav>
     </div>
 
+    <!-- MODAL -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal">
             <h3 id="modal-titulo">📅 Agendamento</h3>
@@ -136,34 +98,31 @@
                 <input type="text" id="modal-data" readonly>
             </div>
             <div class="modal-group">
-                <label>Paciente</label>
-                <select id="modal-paciente">
-                    <option value="">Selecione um paciente...</option>
-                </select>
+                <label>Nome do Paciente</label>
+                <input type="text" id="modal-paciente" placeholder="Nome do paciente">
             </div>
             <div class="modal-group">
                 <label>Horário</label>
                 <input type="time" id="modal-hora">
             </div>
             <div class="modal-acoes">
-                <button class="btn-excluir" id="btn-excluir" onclick="excluirAgendamento()">🗑 Excluir</button>
-                <div class="modal-acoes-direita">
-                    <button class="btn-fechar" onclick="fecharModal()">Cancelar</button>
-                    <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
-                </div>
+                <button class="btn-fechar" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
             </div>
         </div>
     </div>
 
+    <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
         <span>Acessibilidade:</span>
         <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
         <button class="btn-acess" onclick="aumentarFonte()" aria-label="Aumentar fonte">A+</button>
         <button class="btn-acess" id="btn-contraste" onclick="alternarContraste()" aria-label="Alternar alto contraste">◑ Contraste</button>
-        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de tela</button>
+        <button class="btn-acess" id="btn-voz" onclick="alternarVoz()" aria-label="Ativar leitura de tela">🔊 Leitura de voz</button>
         <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
     </div>
 
+    <!-- HEADER -->
     <div class="header">
         <div class="menu_btn" id="menu_btn">
             <i class="bi bi-list"></i>
@@ -177,152 +136,19 @@
         </div>
     </div>
 
+    <!-- CONTEÚDO -->
     <div class="painel-container">
         <div class="card-secao">
             <div class="secao-header">
                 <h2>📅 Agenda de Terapias</h2>
                 <span class="data-badge" id="data-hoje"></span>
             </div>
-            <div id='calendar'></div>
+            <div id="calendar"></div>
         </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <script src="/js/acessibilidade.js"></script>
-
-    <script>
-        const menuBtn = document.getElementById('menu_btn');
-        const sidebar = document.getElementById('sidebar');
-        const closeBtn = document.getElementById('closeBtn');
-        const overlayEl = document.getElementById('overlay');
-
-        menuBtn.addEventListener('click', () => { sidebar.classList.add('aberto'); overlayEl.classList.add('ativo'); });
-        closeBtn.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
-        overlayEl.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlayEl.classList.remove('ativo'); });
-
-        const hoje = new Date();
-        document.getElementById('data-hoje').textContent =
-            hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-
-        let dataSelecionada = '';
-        let idConsultaSelecionada = '';
-        let calendarInstance = null;
-        let pacientesCache = [];
-
-        async function carregarPacientes() {
-            const response = await fetch('/api/pacientes');
-            pacientesCache = await response.json();
-            const select = document.getElementById('modal-paciente');
-            select.innerHTML = '<option value="">Selecione um paciente...</option>';
-            pacientesCache.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id_paciente;
-                opt.textContent = p.nome + ' ' + p.sobrenome;
-                select.appendChild(opt);
-            });
-        }
-
-        carregarPacientes();
-
-        function abrirModal(dateStr, idPaciente = '', hora = '', idConsulta = '') {
-            dataSelecionada = dateStr;
-            idConsultaSelecionada = idConsulta;
-            const [ano, mes, dia] = dateStr.split('-');
-            document.getElementById('modal-titulo').textContent = idConsulta ? '📋 Editar Agendamento' : '📅 Novo Agendamento';
-            document.getElementById('modal-data').value = `${dia}/${mes}/${ano}`;
-            document.getElementById('modal-hora').value = hora;
-            document.getElementById('btn-excluir').style.display = idConsulta ? 'block' : 'none';
-            document.getElementById('modal-overlay').classList.add('ativo');
-            setTimeout(() => {
-                document.getElementById('modal-paciente').value = idPaciente;
-            }, 100);
-        }
-
-        function mostrarToast(msg, tipo = 'sucesso') {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = `toast ${tipo} show`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function fecharModal() {
-            document.getElementById('modal-overlay').classList.remove('ativo');
-        }
-
-        function confirmarAgendamento() {
-            const id_paciente = document.getElementById('modal-paciente').value;
-            const hora = document.getElementById('modal-hora').value;
-            const btn = document.getElementById('btn-confirmar');
-
-            if (!id_paciente) {
-                mostrarToast('Selecione um paciente!', 'erro');
-                return;
-            }
-
-            btn.disabled = true;
-
-            fetch('/api/agendamentos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_paciente, data: dataSelecionada, hora: hora || null })
-            }).then(res => res.json()).then(data => {
-                btn.disabled = false;
-                if (data.sucesso) {
-                    calendarInstance.refetchEvents();
-                    fecharModal();
-                    mostrarToast('Agendamento salvo!', 'sucesso');
-                } else {
-                    mostrarToast('Erro ao salvar!', 'erro');
-                }
-            }).catch(() => {
-                btn.disabled = false;
-                mostrarToast('Erro de conexão!', 'erro');
-            });
-        }
-
-        function excluirAgendamento() {
-            if (!idConsultaSelecionada) return;
-            if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
-
-            fetch(`/api/agendamentos/${idConsultaSelecionada}`, {
-                method: 'DELETE'
-            }).then(res => res.json()).then(data => {
-                if (data.sucesso) {
-                    calendarInstance.refetchEvents();
-                    fecharModal();
-                    mostrarToast('Agendamento excluído!', 'sucesso');
-                } else {
-                    mostrarToast('Erro ao excluir!', 'erro');
-                }
-            }).catch(() => {
-                mostrarToast('Erro de conexão!', 'erro');
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-
-            calendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'pt-br',
-                buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
-                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
-                events: '/api/agendamentos',
-                dateClick: function (info) {
-                    abrirModal(info.dateStr);
-                },
-                eventClick: function (info) {
-                    const startStr = info.event.startStr.split('T')[0];
-                    const hora = info.event.startStr.includes('T') ? info.event.startStr.split('T')[1].substring(0,5) : '';
-                    const idPaciente = info.event.extendedProps.id_paciente || '';
-                    const idConsulta = info.event.id || '';
-                    abrirModal(startStr, idPaciente, hora, idConsulta);
-                }
-            });
-
-            calendarInstance.render();
-        });
-    </script>
+    <script src="/js/calendario.js"></script>
 
     <div class="toast" id="toast"></div>
 </body>
