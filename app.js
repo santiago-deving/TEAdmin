@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 var bodyParser = require('body-parser');
 const path = require('path');
 
@@ -23,6 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
+    store: new pgSession({
+        pool: db.pool,
+        tableName: 'session',
+        schemaName: 'teadmin'
+    }),
     secret: 'grupo12',
     resave: false,
     saveUninitialized: false,
@@ -165,6 +171,7 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
     try {
         const user = req.session.usuario;
         const client = await db.connect();
+        const id_profissional = user.id_profissional;
 
         let result;
 
@@ -174,9 +181,9 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
             result = await client.query('SELECT * FROM teadmin.consultas_hoje($1)', [user.id_profissional]);
         }
 
-        const consultasRaw = result.rows;
-        const consultasLista = [];
-        const pacientes = [];
+        let consultasRaw = result.rows;
+        let consultasLista = [];
+        let pacientes = [];
 
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
@@ -203,7 +210,7 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
         }
 
         client.release();
-        res.json({ pacientes, consultasLista });
+        res.send({ "pacientes" : pacientes, "consultasLista" : consultasLista });
     } catch (error) {
         res.send(`Erro: ${error}`);
     }
@@ -216,7 +223,7 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
         const frequencia = await calcFreq(id_paciente, id_profissional, req);
         console.log(frequencia);
         console.log(typeof(frequencia));
-        return res.json(frequencia);
+        return res.send(frequencia);
     } catch (error) {
         res.send(`Erro: ${error}`);
     }
@@ -250,7 +257,7 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
         }
 
         client.release();
-        res.json(freqs);
+        res.send(freqs);
     } catch (error) {
         console.error('Erro /ver_freq/todos:', error);
         res.status(500).json({ erro: error.message }); // retorna JSON mesmo no erro
