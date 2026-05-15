@@ -223,7 +223,7 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
         const frequencia = await calcFreq(id_paciente, id_profissional, req);
         console.log(frequencia);
         console.log(typeof(frequencia));
-        return res.send(frequencia);
+        return res.json({ frequencia });
     } catch (error) {
         res.send(`Erro: ${error}`);
     }

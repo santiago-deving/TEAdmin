@@ -31,10 +31,9 @@ async function sendPacienteDadosHoje() {
     return await getData('send_paciente_dados/hoje');
 }
 
-// Retorna a frequência de um paciente (string "XX.XX")
-// Espera: "XX.XX"
 async function verFreq(id_paciente) {
-    return await getData(`/ver_freq?id_paciente=${id_paciente}`);
+    const data = await getData(`/ver_freq?id_paciente=${id_paciente}`);
+    return data.frequencia;
 }
 
 // Registra presença do paciente na consulta
