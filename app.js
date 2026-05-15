@@ -214,6 +214,46 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
     }
 });
 
+app.get('/send_dados_terapeutas', async (req, res) => {
+    const client = await db.connect();
+    try {
+        let terapeutas = await client.query('SELECT * FROM profissional');
+        terapeutas = terapeutas.rows;
+
+        let consultasLista = [];
+
+        for (const terapeuta of terapeutas) {
+            const consultas = await client.query(
+                'SELECT * FROM consulta WHERE id_profissional = $1',
+                [terapeuta.id_profissional]
+            );
+
+            const consultasComNome = [];
+            for (const c of consultas.rows) {
+                const paciente = await client.query(
+                    'SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1',
+                    [c.id_paciente]
+                );
+
+                consultasComNome.push({
+                    ...c,
+                    nome:      paciente.rows[0]?.nome,
+                    sobrenome: paciente.rows[0]?.sobrenome
+                });
+            }
+
+            consultasLista = consultasComNome;
+        }
+
+        res.json({ terapeutas, consultasLista });
+
+    } catch (error) {
+        res.send(`Erro: ${error}`);
+    } finally {
+        client.release();
+    }
+});
+
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
         console.log('QUERY:', req.query);
