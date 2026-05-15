@@ -14,6 +14,7 @@ const port = process.env.PORT || 3000 ;
 
 const e = require('express');
 
+app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
 
@@ -33,7 +34,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: true,
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'lax'
