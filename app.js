@@ -254,6 +254,48 @@ app.get('/send_dados_terapeutas', async (req, res) => {
     }
 });
 
+// NOVA ROTA: dados do responsável logado com as consultas do seu paciente
+app.get('/send_dados_responsavel', verificarLogin([0]), async (req, res) => {
+    const client = await db.connect();
+    try {
+        const user = req.session.usuario; // responsável já está na sessão, sem SELECT
+
+        // Busca o paciente vinculado ao responsável
+        const pacienteRaw = await client.query(
+            'SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1',
+            [user.id_responsavel]
+        );
+        const id_paciente = pacienteRaw.rows[0]?.id_paciente;
+
+        // Busca as consultas do paciente
+        const consultas = await client.query(
+            'SELECT * FROM teadmin.consulta WHERE id_paciente = $1 ORDER BY data_consulta',
+            [id_paciente]
+        );
+
+        // Monta consultasLista com nome do paciente
+        const consultasLista = [];
+        for (const c of consultas.rows) {
+            const paciente = await client.query(
+                'SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1',
+                [id_paciente]
+            );
+            consultasLista.push({
+                ...c,
+                nome:      paciente.rows[0]?.nome,
+                sobrenome: paciente.rows[0]?.sobrenome
+            });
+        }
+
+        res.json({ responsavel: user, consultasLista });
+
+    } catch (error) {
+        res.send(`Erro: ${error}`);
+    } finally {
+        client.release();
+    }
+});
+
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
         console.log('QUERY:', req.query);

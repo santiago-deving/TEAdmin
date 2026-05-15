@@ -75,11 +75,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     };
 
     let terapeutaMap = {};
+
     if (dadosUsuario?.tipo === 2) {
+        // Admin: busca todos os terapeutas
         const dadosTerapeutas = await getData('/send_dados_terapeutas');
         (dadosTerapeutas?.terapeutas ?? []).forEach(t => {
             terapeutaMap[t.id_profissional] = t.nome;
         });
+    }
+
+    if (dadosUsuario?.tipo === 0) {
+        // Responsável: busca dados do responsável logado com as consultas do paciente
+        const dadosResponsavel = await getData('/send_dados_responsavel');
+        // dadosResponsavel.responsavel → dados do responsável
+        // dadosResponsavel.consultasLista → consultas do paciente vinculado
+        // terapeutaMap não é necessário para responsável, mas pode ser expandido futuramente
     }
 
     const eventos = consultas.map(c => {
