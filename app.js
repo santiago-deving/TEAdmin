@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require("express-session");
-const pgSession = require("connect-pg-simple")(session);
+// const pgSession = require("connect-pg-simple")(session);
 var bodyParser = require('body-parser');
 const path = require('path');
 
@@ -24,20 +24,17 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(session({
-    store: new pgSession({
-        pool: db.pool,
-        tableName: 'session',
-        schemaName: 'teadmin'
-    }),
-    secret: 'grupo12',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
+        secure: isProduction,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: isProduction ? 'none' : 'lax'
     }
 }));
 
@@ -222,8 +219,6 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
         const id_paciente = parseInt(req.query.id_paciente);
         const id_profissional = parseInt(req.query.id_profissional);
         const frequencia = await calcFreq(id_paciente, id_profissional, req);
-        console.log(frequencia);
-        console.log(typeof(frequencia));
         return res.json({ frequencia });
     } catch (error) {
         res.send(`Erro: ${error}`);

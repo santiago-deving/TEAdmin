@@ -1,14 +1,40 @@
 // ===== FUNÇÃO BASE DE FETCH =====
+// async function getData(route) {
+//     try {
+//         const response = await fetch(route);
+//         if (!response.ok) {
+//             throw new Error(`Response status: ${response.status}`);
+//         }
+//         const result = await response.json();
+//         return result;
+//     } catch (error) {
+//         console.error(error.message);
+//     }
+// }
+
 async function getData(route) {
     try {
-        const response = await fetch(route);
+        const response = await fetch(route, {
+            credentials: 'include'
+        });
+
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
-        const result = await response.json();
-        return result;
+
+        const contentType = response.headers.get('content-type');
+
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Resposta não é JSON:', text);
+            throw new Error('Resposta inválida');
+        }
+
+        return await response.json();
+
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
+        return null;
     }
 }
 
@@ -33,7 +59,8 @@ async function sendPacienteDadosHoje() {
 
 async function verFreq(id_paciente) {
     const data = await getData(`/ver_freq?id_paciente=${id_paciente}`);
-    return data.frequencia;
+    console.log(data);
+    return data?.frequencia;
 }
 
 // Registra presença do paciente na consulta
@@ -119,19 +146,29 @@ async function init() {
         }
 
         // Busca frequência de todos os pacientes em paralelo
-        const freqResultados = await Promise.all(
-            pacientes.map(p =>
-                verFreq(p.id_paciente)
-                    .then(freq => ({ id_paciente: p.id_paciente, freq }))
-                    .catch(() => ({ id_paciente: p.id_paciente, freq: null }))
-            )
+        // const freqResultados = await Promise.all(
+        //     pacientes.map(p =>
+        //         verFreq(p.id_paciente)
+        //             .then(freq => ({ id_paciente: p.id_paciente, freq }))
+        //             .catch(() => ({ id_paciente: p.id_paciente, freq: null }))
+        //     )
+        // );
+        const freqResultados = await Promise.allSettled(
+    pacientes.map(p => verFreq(p.id_paciente))
         );
 
         // Monta mapa de frequência por id_paciente
         const freqMap = {};
-        for (const r of freqResultados) {
-            freqMap[r.id_paciente] = r.freq !== null ? parseFloat(r.freq) : null;
-        }
+
+        freqResultados.forEach((r, index) => {
+            const id_paciente = pacientes[index].id_paciente;
+
+            if (r.status === 'fulfilled') {
+                freqMap[id_paciente] = parseFloat(r.value);
+            } else {
+                freqMap[id_paciente] = null;
+            }
+        });
 
         tabela.innerHTML = pacientes.map(p => {
             const freq = freqMap[p.id_paciente];
