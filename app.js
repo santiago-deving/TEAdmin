@@ -118,10 +118,9 @@ app.get('/send_user', (req, res) => {
 })
 
 app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
+    const client = await db.connect();
     try {
         let user = req.session.usuario;
-        const client = await db.connect();
-
         var result = {};
 
         if (user.tipo === 2) {
@@ -157,18 +156,18 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
 
         let pacientes_dados = {pacientes: pacientes, consultasLista: consultasLista}
 
-        client.release();
-
         res.send(pacientes_dados);
     } catch (error) {
         res.send(`Erro: ${error}`)
+    } finally {
+        client.release();
     }
 })
 
 app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
+    const client = await db.connect();
     try {
         const user = req.session.usuario;
-        const client = await db.connect();
         const id_profissional = user.id_profissional;
 
         let result;
@@ -207,10 +206,11 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
             }
         }
 
-        client.release();
         res.send({ "pacientes" : pacientes, "consultasLista" : consultasLista });
     } catch (error) {
         res.send(`Erro: ${error}`);
+    } finally {
+        client.release();
     }
 });
 
@@ -289,10 +289,10 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
 });
 
 app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
+    const client = await db.connect();
     try {
         const user = req.session.usuario;
-        const tipo = parseInt(user.tipo); // garante número
-        const client = await db.connect();
+        const tipo = parseInt(user.tipo);
 
         let pacientes;
         if (tipo === 1) {
@@ -301,25 +301,38 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
                 [user.id_profissional]
             );
         } else if (tipo === 2) {
-            pacientes = await client.query('SELECT DISTINCT id_paciente FROM teadmin.consulta');
+            pacientes = await client.query(
+                'SELECT DISTINCT id_paciente FROM teadmin.consulta'
+            );
+        } else {
+            return res.status(403).json({ erro: 'Acesso não permitido' });
         }
 
         const freqs = {};
         for (const p of pacientes.rows) {
             let result;
             if (tipo === 1) {
-                result = await client.query('SELECT calcfreq($1, $2)', [p.id_paciente, user.id_profissional]);
-            } else if (tipo === 2) {
-                result = await client.query('SELECT calcfreq($1)', [p.id_paciente]);
+                result = await client.query(
+                    'SELECT teadmin.calcfreq($1, $2)', 
+                    [p.id_paciente, user.id_profissional]
+                );
+            } else {
+                result = await client.query(
+                    'SELECT teadmin.calcfreq($1)', 
+                    [p.id_paciente]
+                );
             }
-            freqs[String(p.id_paciente)] = result.rows[0].calcfreq;
+            // Pega o valor da primeira coluna, independente do nome
+            const row = result.rows[0];
+            freqs[String(p.id_paciente)] = row[Object.keys(row)[0]];
         }
 
-        client.release();
-        res.send(freqs);
+        res.json(freqs);
     } catch (error) {
         console.error('Erro /ver_freq/todos:', error);
-        res.status(500).json({ erro: error.message }); // retorna JSON mesmo no erro
+        res.status(500).json({ erro: error.message });
+    } finally {
+        client.release(); // sempre libera, com erro ou sem
     }
 });
 

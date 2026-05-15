@@ -153,22 +153,13 @@ async function init() {
         //             .catch(() => ({ id_paciente: p.id_paciente, freq: null }))
         //     )
         // );
-        const freqResultados = await Promise.allSettled(
-    pacientes.map(p => verFreq(p.id_paciente))
-        );
-
-        // Monta mapa de frequência por id_paciente
+        const freqTodos = await getData('/ver_freq/todos');
         const freqMap = {};
-
-        freqResultados.forEach((r, index) => {
-            const id_paciente = pacientes[index].id_paciente;
-
-            if (r.status === 'fulfilled') {
-                freqMap[id_paciente] = parseFloat(r.value);
-            } else {
-                freqMap[id_paciente] = null;
+        if (freqTodos) {
+            for (const [id, freq] of Object.entries(freqTodos)) {
+                freqMap[id] = parseFloat(freq);
             }
-        });
+        }
 
         tabela.innerHTML = pacientes.map(p => {
             const freq = freqMap[p.id_paciente];
