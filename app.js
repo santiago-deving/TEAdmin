@@ -214,7 +214,7 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
     }
 });
 
-app.get('/send_dados_terapeutas', async (req, res) => {
+app.get('/send_dados_terapeutas', verificarLogin(),async (req, res) => {
     const client = await db.connect();
     try {
         let terapeutas = await client.query('SELECT * FROM profissional');
@@ -297,12 +297,11 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
         let pacientes;
         if (tipo === 1) {
             pacientes = await client.query(
-                'SELECT DISTINCT id_paciente FROM teadmin.consulta WHERE id_profissional = $1',
-                [user.id_profissional]
+                `SELECT DISTINCT id_paciente FROM consulta WHERE id_profissional = ${user.id_profissional}`
             );
         } else if (tipo === 2) {
             pacientes = await client.query(
-                'SELECT DISTINCT id_paciente FROM teadmin.consulta'
+                'SELECT DISTINCT id_paciente FROM consulta'
             );
         } else {
             return res.status(403).json({ erro: 'Acesso não permitido' });
@@ -332,7 +331,7 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
         console.error('Erro /ver_freq/todos:', error);
         res.status(500).json({ erro: error.message });
     } finally {
-        client.release(); // sempre libera, com erro ou sem
+        client.release();
     }
 });
 
