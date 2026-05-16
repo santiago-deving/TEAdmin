@@ -82,7 +82,7 @@ app.get('/painel_terapeutas', verificarLogin([1]), (req, res) => {
     res.render('painel-terapeuta', {user: req.session.usuario});
 });
 
-app.get("/calendario", (req, res) => {
+app.get("/calendario", verificarLogin(),(req, res) => {
     res.render('calendario');
 });
 
@@ -344,6 +344,37 @@ app.get("/logout", (req, res) => {
 /////////////// ROTAS POST //////////////// 
 ///////////////////////////////////////////
 
+app.post('/enviar_novo_agendamento', verificarLogin([1, 2]), async function (req, res) {
+    const client = await db.connect();
+    try {
+        const usuario = req.session.usuario;
+        const novaConsulta = req.body;
+        console.log(usuario);
+        console.log(novaConsulta);
+
+        if (usuario.tipo === 2) {
+            await client.query(
+                'INSERT INTO consulta (id_paciente, id_profissional, id_recepcionista, id_status, data_consulta, hora_consulta) VALUES ($1, $2, $3, $4, $5, $6)',
+                [novaConsulta.id_paciente, novaConsulta.id_profissional, 1, 1, novaConsulta.data_consulta, novaConsulta.hora_consulta]
+            );
+        } else if (usuario.tipo === 1) {
+            await client.query(
+                'INSERT INTO consulta (id_paciente, id_profissional, id_recepcionista, id_status, data_consulta, hora_consulta) VALUES ($1, $2, $3, $4, $5, $6)',
+                [novaConsulta.id_paciente, usuario.id_profissional, 1, 1, novaConsulta.data_consulta, novaConsulta.hora_consulta]
+            );
+        } else {
+            return res.status(403).json({ mensagem: 'Usuário não autorizado!' });
+        }
+
+        res.json({ mensagem: 'Consulta agendada com sucesso!' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ mensagem: `Erro: ${error.message}` });
+    } finally {
+        client.release();
+    }
+});
+
 app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
@@ -370,6 +401,36 @@ app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
         console.log(error);
     }
 
+});
+
+app.put('/enviar_agendamento_editado', verificarLogin([1, 2]), async function (req, res) {
+    const client = await db.connect();
+    try {
+        const usuario = req.session.usuario;
+        const { id_consulta, id_paciente, id_profissional, data_consulta, hora_consulta } = req.body;
+
+        if (usuario.tipo === 2) {
+            // Admin pode alterar tudo
+            await client.query(
+                'UPDATE consulta SET id_paciente = $1, id_profissional = $2, data_consulta = $3, hora_consulta = $4 WHERE id_consulta = $5',
+                [id_paciente, id_profissional, data_consulta, hora_consulta, id_consulta]
+            );
+        } else if (usuario.tipo === 1) {
+            // Terapeuta não
+            await client.query(
+                'UPDATE consulta SET data_consulta = $1, hora_consulta = $2 WHERE id_consulta = $3 AND id_profissional = $4',
+                [data_consulta, hora_consulta, id_consulta, usuario.id_profissional]
+            );
+        } else {
+            return res.status(403).json({ mensagem: 'Usuário não autorizado!' });
+        }
+
+        res.json({ mensagem: 'Consulta atualizada com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ mensagem: `Erro: ${error.message}` });
+    } finally {
+        client.release();
+    }
 });
 
 //////////////////////////////////////////

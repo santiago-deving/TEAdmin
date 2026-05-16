@@ -45,7 +45,7 @@
         .modal-overlay.ativo { display: flex; }
         .modal {
             background: #fff; border-radius: 16px;
-            padding: 32px; width: 400px; max-width: 90%;
+            padding: 32px; width: 420px; max-width: 90%;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
         .modal h3 { color: var(--azul); margin-bottom: 20px; font-size: 1.1rem; }
@@ -54,8 +54,10 @@
         .modal-group input, .modal-group select {
             padding: 10px 14px; border: 1.5px solid #ddd;
             border-radius: 10px; font-size: 0.9rem; outline: none;
+            width: 100%; box-sizing: border-box;
         }
         .modal-group input:focus, .modal-group select:focus { border-color: var(--azul); }
+        .modal-group input[readonly] { background: #f5f5f5; color: #888; cursor: default; }
         .modal-acoes { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
         .btn-confirmar {
             background-color: var(--azul); color: #fff; border: none;
@@ -93,21 +95,46 @@
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal">
             <h3 id="modal-titulo">📅 Agendamento</h3>
+
+            <!-- Campos ocultos: IDs usados nas requisições -->
+            <input type="hidden" id="modal-id-consulta">
+            <input type="hidden" id="modal-id-paciente">
+            <input type="hidden" id="modal-id-profissional">
+
             <div class="modal-group">
                 <label>Data</label>
                 <input type="text" id="modal-data" readonly>
             </div>
-            <div class="modal-group">
-                <label>Nome do Paciente</label>
-                <input type="text" id="modal-paciente" placeholder="Nome do paciente">
+
+            <!-- Paciente: datalist permite digitar e filtrar -->
+            <div class="modal-group" id="grupo-paciente">
+                <label>Paciente</label>
+                <input
+                    type="text"
+                    id="modal-paciente"
+                    list="lista-pacientes"
+                    placeholder="Digite ou selecione o paciente"
+                    autocomplete="off"
+                >
+                <datalist id="lista-pacientes"></datalist>
             </div>
+
             <div class="modal-group">
                 <label>Horário</label>
                 <input type="time" id="modal-hora">
             </div>
+
+            <!-- Terapeuta: visível apenas para admin (tipo 2) -->
+            <div class="modal-group" id="grupo-terapeuta" style="display:none;">
+                <label>Terapeuta</label>
+                <select id="modal-terapeuta">
+                    <option value="">Selecione o terapeuta</option>
+                </select>
+            </div>
+
             <div class="modal-acoes">
                 <button class="btn-fechar" onclick="fecharModal()">Cancelar</button>
-                <button class="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
+                <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarAgendamento()">Confirmar</button>
             </div>
         </div>
     </div>
