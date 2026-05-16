@@ -1,0 +1,94 @@
+/* ===== AGENDA SEMANAL ===== */
+.agenda-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.agenda-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 100px;
+}
+
+.agenda-dia-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--azul);
+    text-align: center;
+    padding: 6px 4px;
+    background: rgba(46, 134, 171, 0.08);
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+
+.agenda-dia-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.agenda-evento {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agenda-hora {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.agenda-paciente {
+    font-size: 0.78rem;
+    color: #555;
+}
+
+.agenda-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.agenda-vazio {
+    color: #ccc;
+    font-size: 0.85rem;
+    text-align: center;
+    display: block;
+    padding: 8px 0;
+}
+
+/* ===== AGUARDANDO ===== */
+.aguardando-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.aguardando-item:last-child {
+    border-bottom: none;
+}
+
+.aguardando-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.aguardando-nome {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.aguardando-data {
+    font-size: 0.8rem;
+    color: #888;
+}

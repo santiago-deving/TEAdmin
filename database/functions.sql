@@ -53,3 +53,29 @@ BEGIN
         ORDER BY c.hora_consulta;
 END;
 $function$;
+
+-- DROP FUNCTION teadmin.consultas_hoje_pac(int8);
+
+CREATE OR REPLACE FUNCTION teadmin.consultas_hoje_pac(p_paciente bigint DEFAULT NULL::bigint)
+ RETURNS TABLE(id_consulta bigint, id_paciente bigint, id_profissional bigint, id_status integer, hora_consulta time without time zone, data_consulta date, nome character varying, sobrenome character varying)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+        SELECT 
+            c.id_consulta,
+            c.id_paciente,
+            c.id_profissional,
+            c.id_status,
+            c.hora_consulta,
+            c.data_consulta,
+            p.nome,
+            p.sobrenome
+        FROM teadmin.consulta c
+        JOIN teadmin.pacientes p ON p.id_paciente = c.id_paciente
+        WHERE DATE(c.data_consulta) = CURRENT_DATE
+          AND (p_paciente IS NULL OR c.id_paciente = p_paciente)
+        ORDER BY c.hora_consulta;
+END;
+$function$
+;

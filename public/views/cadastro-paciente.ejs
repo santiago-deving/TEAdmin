@@ -12,9 +12,7 @@
     <div class="overlay" id="overlay"></div>
 
     <div class="sidebar" id="sidebar">
-        <div class="closeBtn" id="closeBtn">
-            <i class="bi bi-x"></i>
-        </div>
+        <div class="closeBtn" id="closeBtn"><i class="bi bi-x"></i></div>
         <nav>
             <ul>
                 <li><a href="/painel_admin">Painel Administrativo</a></li>
@@ -27,7 +25,6 @@
         </nav>
     </div>
 
-    <!-- BARRA DE ACESSIBILIDADE -->
     <div class="barra-acessibilidade" role="toolbar" aria-label="Ferramentas de acessibilidade">
         <span>Acessibilidade:</span>
         <button class="btn-acess" onclick="diminuirFonte()" aria-label="Diminuir fonte">A-</button>
@@ -37,11 +34,8 @@
         <button class="btn-acess" onclick="abrirLibras()" aria-label="Abrir intérprete de Libras">🤟 Libras</button>
     </div>
 
-    <!-- HEADER -->
     <header class="header">
-        <div class="menu_btn" id="menu_btn">
-            <i class="bi bi-list"></i>
-        </div>
+        <div class="menu_btn" id="menu_btn"><i class="bi bi-list"></i></div>
         <div class="header-logo">
             <h1><span class="te">TE</span><span class="adm">Adm</span></h1>
         </div>
@@ -61,14 +55,19 @@
         <div class="form-wrapper">
 
             <section class="card-secao">
-                <div class="secao-header">
-                    <h2>📋 Dados Pessoais</h2>
-                </div>
+                <div class="secao-header"><h2>📋 Dados Pessoais</h2></div>
                 <div class="form-grid">
-                    <div class="form-group span-2">
-                        <label for="nome">Nome Completo *</label>
-                        <input type="text" id="nome" name="nome" placeholder="Nome completo do paciente" required>
+
+                    <!-- Nome e Sobrenome separados -->
+                    <div class="form-group">
+                        <label for="nome">Nome *</label>
+                        <input type="text" id="nome" name="nome" placeholder="Nome do paciente" required>
                     </div>
+                    <div class="form-group">
+                        <label for="sobrenome">Sobrenome *</label>
+                        <input type="text" id="sobrenome" name="sobrenome" placeholder="Sobrenome do paciente" required>
+                    </div>
+
                     <div class="form-group">
                         <label for="data_nascimento">Data de Nascimento *</label>
                         <input type="date" id="data_nascimento" name="data_nascimento" required>
@@ -108,9 +107,7 @@
             </section>
 
             <section class="card-secao">
-                <div class="secao-header">
-                    <h2>📞 Contato</h2>
-                </div>
+                <div class="secao-header"><h2>📞 Contato</h2></div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="telefone">Telefone</label>
@@ -124,9 +121,7 @@
             </section>
 
             <section class="card-secao">
-                <div class="secao-header">
-                    <h2>📍 Endereço</h2>
-                </div>
+                <div class="secao-header"><h2>📍 Endereço</h2></div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="cep">CEP</label>
@@ -169,9 +164,7 @@
             </section>
 
             <section class="card-secao">
-                <div class="secao-header">
-                    <h2>🏥 Plano de Saúde</h2>
-                </div>
+                <div class="secao-header"><h2>🏥 Plano de Saúde</h2></div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="plano_nome">Nome do Plano</label>
@@ -189,13 +182,11 @@
             </section>
 
             <section class="card-secao">
-                <div class="secao-header">
-                    <h2>📝 Observações</h2>
-                </div>
+                <div class="secao-header"><h2>📝 Observações</h2></div>
                 <div class="form-grid">
                     <div class="form-group span-full">
                         <label for="observacoes">Observações Clínicas / Informações Adicionais</label>
-                        <textarea id="observacoes" name="observacoes" rows="5" placeholder="Informações relevantes sobre o paciente, histórico, necessidades especiais..."></textarea>
+                        <textarea id="observacoes" name="observacoes" rows="5" placeholder="Informações relevantes sobre o paciente..."></textarea>
                     </div>
                 </div>
             </section>
@@ -212,27 +203,18 @@
         </div>
     </main>
 
+    <div class="toast" id="toast"></div>
+
     <script src="/js/acessibilidade.js"></script>
     <script src="/js/cadastro-paciente.js"></script>
-
     <script>
         const menuBtn = document.getElementById('menu_btn');
         const sidebar = document.getElementById('sidebar');
         const closeBtn = document.getElementById('closeBtn');
         const overlay = document.getElementById('overlay');
-
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.add('aberto');
-            overlay.classList.add('ativo');
-        });
-        closeBtn.addEventListener('click', () => {
-            sidebar.classList.remove('aberto');
-            overlay.classList.remove('ativo');
-        });
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('aberto');
-            overlay.classList.remove('ativo');
-        });
+        menuBtn.addEventListener('click',  () => { sidebar.classList.add('aberto');    overlay.classList.add('ativo'); });
+        closeBtn.addEventListener('click', () => { sidebar.classList.remove('aberto'); overlay.classList.remove('ativo'); });
+        overlay.addEventListener('click',  () => { sidebar.classList.remove('aberto'); overlay.classList.remove('ativo'); });
     </script>
 </body>
 </html>

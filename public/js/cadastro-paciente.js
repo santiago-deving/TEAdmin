@@ -1,21 +1,29 @@
-// ===== DADOS DO ADMIN (virá do backend futuramente) =====
-const dadosAdmin = {
-    nome: "Administrador",
-    terapeutas: []
-};
+// ===== FETCH BASE =====
+async function getData(route) {
+    try {
+        const res = await fetch(route);
+        if (!res.ok) throw new Error(`Response status: ${res.status}`);
+        return await res.json();
+    } catch (e) {
+        console.error(e.message);
+        return null;
+    }
+}
 
-document.getElementById('nome-admin').textContent = dadosAdmin.nome;
+// ===== TOAST =====
+function mostrarToast(mensagem, tipo = 'sucesso') {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = mensagem;
+    toast.className = `toast ${tipo} show`;
+    setTimeout(() => toast.classList.remove('show'), 3500);
+}
 
-// Preenche select de terapeutas
-const selectTerapeuta = document.getElementById('terapeuta');
-dadosAdmin.terapeutas.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.id;
-    opt.textContent = t.nome;
-    selectTerapeuta.appendChild(opt);
-});
-
-// ===== MÁSCARA CPF =====
+// ===== MÁSCARAS =====
 document.getElementById('cpf').addEventListener('input', function () {
     let v = this.value.replace(/\D/g, '').slice(0, 11);
     v = v.replace(/(\d{3})(\d)/, '$1.$2');
@@ -24,66 +32,50 @@ document.getElementById('cpf').addEventListener('input', function () {
     this.value = v;
 });
 
-// ===== MÁSCARA TELEFONE =====
 document.getElementById('telefone').addEventListener('input', function () {
     let v = this.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length <= 10) {
-        v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    } else {
-        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    }
+    v = v.length <= 10
+        ? v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3')
+        : v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
     this.value = v;
 });
 
-// ===== MÁSCARA CEP =====
 document.getElementById('cep').addEventListener('input', function () {
     let v = this.value.replace(/\D/g, '').slice(0, 8);
     v = v.replace(/(\d{5})(\d{0,3})/, '$1-$2');
     this.value = v;
 });
 
-// ===== BUSCA CEP (ViaCEP) =====
+// ===== BUSCA CEP =====
 document.getElementById('cep').addEventListener('blur', async function () {
     const cep = this.value.replace(/\D/g, '');
     if (cep.length !== 8) return;
-
     try {
-        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await res.json();
         if (!data.erro) {
             document.getElementById('logradouro').value = data.logradouro || '';
-            document.getElementById('bairro').value = data.bairro || '';
-            document.getElementById('cidade').value = data.localidade || '';
-            document.getElementById('estado').value = data.uf || '';
+            document.getElementById('bairro').value     = data.bairro     || '';
+            document.getElementById('cidade').value     = data.localidade || '';
+            document.getElementById('estado').value     = data.uf         || '';
             document.getElementById('numero').focus();
         }
-    } catch (e) {
-        console.warn('Erro ao buscar CEP:', e);
-    }
+    } catch (e) { console.warn('Erro ao buscar CEP:', e); }
 });
-
-// ===== TOAST =====
-function mostrarToast(mensagem, tipo = 'sucesso') {
-    let toast = document.getElementById('toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast';
-        toast.className = 'toast';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = mensagem;
-    toast.className = `toast ${tipo} show`;
-    setTimeout(() => toast.classList.remove('show'), 3500);
-}
 
 // ===== VALIDAÇÃO =====
 function validarFormulario() {
-    const obrigatorios = ['nome', 'data_nascimento', 'sexo'];
-    for (const id of obrigatorios) {
-        const el = document.getElementById(id);
-        if (!el.value.trim()) {
-            el.focus();
-            mostrarToast(`Campo obrigatório não preenchido: ${el.labels[0]?.textContent.replace(' *', '') || id}`, 'erro');
+    const obrigatorios = [
+        { id: 'nome',             label: 'Nome'              },
+        { id: 'sobrenome',        label: 'Sobrenome'         },
+        { id: 'data_nascimento',  label: 'Data de Nascimento'},
+        { id: 'sexo',             label: 'Sexo'              }
+    ];
+    for (const campo of obrigatorios) {
+        const el = document.getElementById(campo.id);
+        if (!el || !el.value.trim()) {
+            el?.focus();
+            mostrarToast(`Campo obrigatório não preenchido: ${campo.label}`, 'erro');
             return false;
         }
     }
@@ -91,40 +83,53 @@ function validarFormulario() {
 }
 
 // ===== SALVAR PACIENTE =====
-function salvarPaciente() {
+async function salvarPaciente() {
     if (!validarFormulario()) return;
 
     const paciente = {
-        nome: document.getElementById('nome').value.trim(),
+        nome:            document.getElementById('nome').value.trim(),
+        sobrenome:       document.getElementById('sobrenome').value.trim(),
         data_nascimento: document.getElementById('data_nascimento').value,
-        cpf: document.getElementById('cpf').value.trim(),
-        sexo: document.getElementById('sexo').value,
-        diagnostico: document.getElementById('diagnostico').value.trim(),
-        terapeuta_id: document.getElementById('terapeuta').value,
-        status: document.getElementById('status').value,
-        telefone: document.getElementById('telefone').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        endereco: {
-            cep: document.getElementById('cep').value.trim(),
-            logradouro: document.getElementById('logradouro').value.trim(),
-            numero: document.getElementById('numero').value.trim(),
-            complemento: document.getElementById('complemento').value.trim(),
-            bairro: document.getElementById('bairro').value.trim(),
-            cidade: document.getElementById('cidade').value.trim(),
-            estado: document.getElementById('estado').value
-        },
-        plano_saude: {
-            nome: document.getElementById('plano_nome').value.trim(),
-            numero: document.getElementById('plano_numero').value.trim(),
-            validade: document.getElementById('plano_validade').value
-        },
-        observacoes: document.getElementById('observacoes').value.trim()
+        sexo:            document.getElementById('sexo').value,
+        cpf:             document.getElementById('cpf').value.replace(/\D/g, '') // só números
     };
 
-    // Futuramente: enviar via fetch para a API
-    console.log('Paciente a cadastrar:', paciente);
-    mostrarToast('✅ Paciente cadastrado com sucesso!', 'sucesso');
-
-    // Redirecionar após cadastro (ajuste a rota conforme necessário)
-    // setTimeout(() => window.location.href = '/pacientes', 2000);
+    try {
+        const res   = await fetch('/cadastro/paciente', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(paciente)
+        });
+        const dados = await res.json();
+        if (!res.ok) throw new Error(dados.mensagem ?? 'Erro ao cadastrar paciente');
+        mostrarToast('Paciente cadastrado com sucesso!', 'sucesso');
+        setTimeout(() => window.location.href = '/cadastro-paciente', 2000);
+    } catch (err) {
+        mostrarToast(err.message, 'erro');
+    }
 }
+
+// ===== INIT =====
+async function init() {
+    const [dadosAdmin, dadosTerapeutas] = await Promise.all([
+        getData('/send_user'),
+        getData('/send_dados_terapeutas')
+    ]);
+
+    // Nome do admin no header
+    if (dadosAdmin) {
+        document.getElementById('nome-admin').textContent = dadosAdmin.nome ?? dadosAdmin.login ?? '...';
+    }
+
+    // Preenche select de terapeutas
+    const selectTerapeuta = document.getElementById('terapeuta');
+    const terapeutas = dadosTerapeutas?.terapeutas ?? [];
+    terapeutas.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value       = t.id_profissional;
+        opt.textContent = t.especialidade ? `${t.nome} — ${t.especialidade}` : t.nome;
+        selectTerapeuta.appendChild(opt);
+    });
+}
+
+init();
