@@ -279,7 +279,8 @@ CREATE TABLE usuario (
     id_usuario BIGSERIAL PRIMARY KEY,
     
     login VARCHAR(50) NOT NULL UNIQUE,
-    senha_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    senha VARCHAR(255) NOT NULL,
 
     id_profissional BIGINT,
     id_recepcionista BIGINT,

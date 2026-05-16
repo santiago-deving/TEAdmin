@@ -41,6 +41,7 @@ function mostrarToast(msg, tipo = 'sucesso') {
 
 // ----- Monta select de terapeutas -----
 function preencherSelectTerapeutas(idSelecionado = null) {
+
     const select = document.getElementById('modal-terapeuta');
     select.innerHTML = '<option value="">Selecione o terapeuta</option>';
     listaTerapeutas.forEach(t => {
@@ -109,6 +110,7 @@ function abrirModal(dateStr) {
 
 // ----- Abre modal: editar consulta existente -----
 function abrirModalEdicao(evento) {
+
     const startStr        = evento.startStr.split('T')[0];
     const [ano, mes, dia] = startStr.split('-');
     dataSelecionada       = startStr;

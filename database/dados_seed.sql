@@ -220,3 +220,7 @@ INSERT INTO telefone_responsavel (id_responsavel, telefone, tipo) VALUES
 -- USUARIOS
 -- =========================
 -- senha fictícia (exemplo bcrypt): $2b$10$abcdefghijklmnopqrstuv
+
+alter table usuario drop column senha_hash;
+
+insert into usuario (login, tipo_usuario, email, senha) values ("admin", "'admin'","adm@teadmin.com", "senha@123");

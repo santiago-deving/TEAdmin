@@ -147,6 +147,7 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
                 }
 
                 paciente.id_consulta = i.id_consulta;
+                paciente.id_profissional = i.id_profissional;
                 paciente.id_status = i.id_status;
                 paciente.hora_consulta = i.hora_consulta;
                 paciente.data_consulta = i.data_consulta;
@@ -256,26 +257,17 @@ app.get('/send_dados_terapeutas', verificarLogin(),async (req, res) => {
 
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
-        console.log('QUERY:', req.query);
-
         const id_paciente = Number(req.query.id_paciente);
 
         const id_profissional = req.query.id_profissional
             ? Number(req.query.id_profissional)
             : null;
 
-        console.log({
-            id_paciente,
-            id_profissional
-        });
-
         const frequencia = await calcFreq(
             id_paciente,
             id_profissional,
             req
         );
-
-        console.log('FREQ:', frequencia);
 
         return res.json({ frequencia });
 
@@ -349,8 +341,6 @@ app.post('/enviar_novo_agendamento', verificarLogin([1, 2]), async function (req
     try {
         const usuario = req.session.usuario;
         const novaConsulta = req.body;
-        console.log(usuario);
-        console.log(novaConsulta);
 
         if (usuario.tipo === 2) {
             await client.query(
@@ -390,7 +380,6 @@ app.post('/api/agendamentos', async (req, res) => {
 app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
     try {
         let id_consulta = req.query.id_consulta;
-        console.log(id_consulta);
         const client = await db.connect();
         const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
 
