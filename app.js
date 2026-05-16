@@ -82,7 +82,7 @@ app.get('/painel_terapeutas', verificarLogin([1]), (req, res) => {
     res.render('painel-terapeuta', {user: req.session.usuario});
 });
 
-app.get("/calendario", verificarLogin(),(req, res) => {
+app.get("/calendario", (req, res) => {
     res.render('calendario');
 });
 
@@ -118,9 +118,10 @@ app.get('/send_user', (req, res) => {
 })
 
 app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
-    const client = await db.connect();
     try {
         let user = req.session.usuario;
+        const client = await db.connect();
+
         var result = {};
 
         if (user.tipo === 2) {
@@ -147,7 +148,6 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
                 }
 
                 paciente.id_consulta = i.id_consulta;
-                paciente.id_profissional = i.id_profissional;
                 paciente.id_status = i.id_status;
                 paciente.hora_consulta = i.hora_consulta;
                 paciente.data_consulta = i.data_consulta;
@@ -157,18 +157,18 @@ app.get('/send_paciente_dados', verificarLogin(),async (req, res) => {
 
         let pacientes_dados = {pacientes: pacientes, consultasLista: consultasLista}
 
+        client.release();
+
         res.send(pacientes_dados);
     } catch (error) {
         res.send(`Erro: ${error}`)
-    } finally {
-        client.release();
     }
 })
 
 app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
-    const client = await db.connect();
     try {
         const user = req.session.usuario;
+        const client = await db.connect();
         const id_profissional = user.id_profissional;
 
         let result;
@@ -185,7 +185,6 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
 
         if (consultasRaw.length > 0) {
             for (const i of consultasRaw) {
-                // Monta lista de pacientes únicos
                 if (!pacientes.some(p => p.id_paciente === i.id_paciente)) {
                     pacientes.push({
                         id_paciente: i.id_paciente,
@@ -194,7 +193,6 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
                     });
                 }
 
-                // Monta consultasLista no mesmo formato do send_paciente_dados
                 consultasLista.push({
                     id_paciente:    i.id_paciente,
                     nome:           i.nome,
@@ -207,46 +205,51 @@ app.get('/send_paciente_dados/hoje', verificarLogin(), async (req, res) => {
             }
         }
 
+        client.release();
         res.send({ "pacientes" : pacientes, "consultasLista" : consultasLista });
     } catch (error) {
         res.send(`Erro: ${error}`);
-    } finally {
-        client.release();
     }
 });
 
-app.get('/send_dados_terapeutas', verificarLogin(),async (req, res) => {
+// Adicionado: rota específica para dados do responsável logado
+// Diferente da rota de terapeutas, não faz SELECT do usuário no banco
+// pois o responsável já está na sessão via req.session.usuario
+app.get('/send_dados_responsavel', verificarLogin([0]), async (req, res) => {
     const client = await db.connect();
     try {
-        let terapeutas = await client.query('SELECT * FROM profissional');
-        terapeutas = terapeutas.rows;
+        // Responsável vem direto da sessão, mesmo objeto retornado por /send_user
+        const responsavel = req.session.usuario;
 
+        // Busca o paciente vinculado ao responsável
+        let pacienteRaw = await client.query(
+            'SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1',
+            [responsavel.id_responsavel]
+        );
+        let id_paciente = pacienteRaw.rows[0].id_paciente;
+
+        // Busca as consultas do paciente vinculado
+        let consultasRaw = await client.query(
+            'SELECT * FROM teadmin.consulta WHERE id_paciente = $1',
+            [id_paciente]
+        );
+
+        // Monta consultasLista com nome e sobrenome do paciente
         let consultasLista = [];
-
-        for (const terapeuta of terapeutas) {
-            const consultas = await client.query(
-                'SELECT * FROM consulta WHERE id_profissional = $1',
-                [terapeuta.id_profissional]
+        for (const c of consultasRaw.rows) {
+            const paciente = await client.query(
+                'SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1',
+                [c.id_paciente]
             );
 
-            const consultasComNome = [];
-            for (const c of consultas.rows) {
-                const paciente = await client.query(
-                    'SELECT id_paciente, nome, sobrenome FROM teadmin.pacientes WHERE id_paciente = $1',
-                    [c.id_paciente]
-                );
-
-                consultasComNome.push({
-                    ...c,
-                    nome:      paciente.rows[0]?.nome,
-                    sobrenome: paciente.rows[0]?.sobrenome
-                });
-            }
-
-            consultasLista = consultasComNome;
+            consultasLista.push({
+                ...c,
+                nome:      paciente.rows[0]?.nome,
+                sobrenome: paciente.rows[0]?.sobrenome
+            });
         }
 
-        res.json({ terapeutas, consultasLista });
+        res.json({ responsavel, consultasLista });
 
     } catch (error) {
         res.send(`Erro: ${error}`);
@@ -257,17 +260,26 @@ app.get('/send_dados_terapeutas', verificarLogin(),async (req, res) => {
 
 app.get('/ver_freq', verificarLogin(), async (req, res) => {
     try {
+        console.log('QUERY:', req.query);
+
         const id_paciente = Number(req.query.id_paciente);
 
         const id_profissional = req.query.id_profissional
             ? Number(req.query.id_profissional)
             : null;
 
+        console.log({
+            id_paciente,
+            id_profissional
+        });
+
         const frequencia = await calcFreq(
             id_paciente,
             id_profissional,
             req
         );
+
+        console.log('FREQ:', frequencia);
 
         return res.json({ frequencia });
 
@@ -281,49 +293,37 @@ app.get('/ver_freq', verificarLogin(), async (req, res) => {
 });
 
 app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
-    const client = await db.connect();
     try {
         const user = req.session.usuario;
         const tipo = parseInt(user.tipo);
+        const client = await db.connect();
 
         let pacientes;
         if (tipo === 1) {
             pacientes = await client.query(
-                `SELECT DISTINCT id_paciente FROM consulta WHERE id_profissional = ${user.id_profissional}`
+                'SELECT DISTINCT id_paciente FROM teadmin.consulta WHERE id_profissional = $1',
+                [user.id_profissional]
             );
         } else if (tipo === 2) {
-            pacientes = await client.query(
-                'SELECT DISTINCT id_paciente FROM consulta'
-            );
-        } else {
-            return res.status(403).json({ erro: 'Acesso não permitido' });
+            pacientes = await client.query('SELECT DISTINCT id_paciente FROM teadmin.consulta');
         }
 
         const freqs = {};
         for (const p of pacientes.rows) {
             let result;
             if (tipo === 1) {
-                result = await client.query(
-                    'SELECT teadmin.calcfreq($1, $2)', 
-                    [p.id_paciente, user.id_profissional]
-                );
-            } else {
-                result = await client.query(
-                    'SELECT teadmin.calcfreq($1)', 
-                    [p.id_paciente]
-                );
+                result = await client.query('SELECT calcfreq($1, $2)', [p.id_paciente, user.id_profissional]);
+            } else if (tipo === 2) {
+                result = await client.query('SELECT calcfreq($1)', [p.id_paciente]);
             }
-            // Pega o valor da primeira coluna, independente do nome
-            const row = result.rows[0];
-            freqs[String(p.id_paciente)] = row[Object.keys(row)[0]];
+            freqs[String(p.id_paciente)] = result.rows[0].calcfreq;
         }
 
-        res.json(freqs);
+        client.release();
+        res.send(freqs);
     } catch (error) {
         console.error('Erro /ver_freq/todos:', error);
         res.status(500).json({ erro: error.message });
-    } finally {
-        client.release();
     }
 });
 
@@ -335,35 +335,6 @@ app.get("/logout", (req, res) => {
 ///////////////////////////////////////////
 /////////////// ROTAS POST //////////////// 
 ///////////////////////////////////////////
-
-app.post('/enviar_novo_agendamento', verificarLogin([1, 2]), async function (req, res) {
-    const client = await db.connect();
-    try {
-        const usuario = req.session.usuario;
-        const novaConsulta = req.body;
-
-        if (usuario.tipo === 2) {
-            await client.query(
-                'INSERT INTO consulta (id_paciente, id_profissional, id_recepcionista, id_status, data_consulta, hora_consulta) VALUES ($1, $2, $3, $4, $5, $6)',
-                [novaConsulta.id_paciente, novaConsulta.id_profissional, 1, 1, novaConsulta.data_consulta, novaConsulta.hora_consulta]
-            );
-        } else if (usuario.tipo === 1) {
-            await client.query(
-                'INSERT INTO consulta (id_paciente, id_profissional, id_recepcionista, id_status, data_consulta, hora_consulta) VALUES ($1, $2, $3, $4, $5, $6)',
-                [novaConsulta.id_paciente, usuario.id_profissional, 1, 1, novaConsulta.data_consulta, novaConsulta.hora_consulta]
-            );
-        } else {
-            return res.status(403).json({ mensagem: 'Usuário não autorizado!' });
-        }
-
-        res.json({ mensagem: 'Consulta agendada com sucesso!' });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ mensagem: `Erro: ${error.message}` });
-    } finally {
-        client.release();
-    }
-});
 
 app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
@@ -380,6 +351,7 @@ app.post('/api/agendamentos', async (req, res) => {
 app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
     try {
         let id_consulta = req.query.id_consulta;
+        console.log(id_consulta);
         const client = await db.connect();
         const result = await client.query('UPDATE teadmin.consulta SET id_status = 1 WHERE id_consulta = $1', [id_consulta]);
 
@@ -390,36 +362,6 @@ app.put('/atender_consulta', verificarLogin([1,2]), async function(req, res) {
         console.log(error);
     }
 
-});
-
-app.put('/enviar_agendamento_editado', verificarLogin([1, 2]), async function (req, res) {
-    const client = await db.connect();
-    try {
-        const usuario = req.session.usuario;
-        const { id_consulta, id_paciente, id_profissional, data_consulta, hora_consulta } = req.body;
-
-        if (usuario.tipo === 2) {
-            // Admin pode alterar tudo
-            await client.query(
-                'UPDATE consulta SET id_paciente = $1, id_profissional = $2, data_consulta = $3, hora_consulta = $4 WHERE id_consulta = $5',
-                [id_paciente, id_profissional, data_consulta, hora_consulta, id_consulta]
-            );
-        } else if (usuario.tipo === 1) {
-            // Terapeuta não
-            await client.query(
-                'UPDATE consulta SET data_consulta = $1, hora_consulta = $2 WHERE id_consulta = $3 AND id_profissional = $4',
-                [data_consulta, hora_consulta, id_consulta, usuario.id_profissional]
-            );
-        } else {
-            return res.status(403).json({ mensagem: 'Usuário não autorizado!' });
-        }
-
-        res.json({ mensagem: 'Consulta atualizada com sucesso!' });
-    } catch (error) {
-        res.status(500).json({ mensagem: `Erro: ${error.message}` });
-    } finally {
-        client.release();
-    }
 });
 
 //////////////////////////////////////////
