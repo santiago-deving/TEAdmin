@@ -476,6 +476,7 @@ app.post("/cadastro/responsavel", verificarLogin([2]), async (req, res) => {
 
         res.json({ mensagem: 'Responsável cadastrado com sucesso!' });
     } catch (error) {
+        await client.query('ROLLBACK');
         res.status(500).json({ mensagem: error.message });
     } finally {
         client.release();
