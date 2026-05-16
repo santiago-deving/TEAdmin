@@ -24,4 +24,8 @@ async function connect() {
     }
 }
 
+pool.on('connect', (client) => {
+    client.query('SET search_path TO teadmin');
+});
+
 module.exports = { connect, pool };
