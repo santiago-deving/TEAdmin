@@ -456,20 +456,31 @@ app.post("/login_send", validac_login, async (req, res) => {
     res.redirect("/");
 });
 
-app.post("/cadastro/responsavel", verificarLogin([2]), async (req,res)=>{
+app.post("/cadastro/responsavel", verificarLogin([2]), async (req, res) => {
     const client = await db.connect();
     try {
-        let novoResp = req.body;
-        // Exemplo:
-        // INSERT INTO responsavel (nome, sobrenome, data_nascimento, sexo, cpf, email, senha) VALUES('Carlos','Silva','1985-05-10','M','77777777777','carlos@email.com','senha101')
+        const novo = req.body;
+        console.log(novo);
 
-        await client.query("INSERT INTO teadmin.responsavel (nome, sobrenome, data_nascimento, sexo, cpf, email, senha) VALUES($1,$2,$3,$4,$5,$6,$7)", [novoResp.nome, novoResp.sobrenome, novoResp.data_nascimento, novoResp.sexo, novoResp.cpf, novoPac.email, novoResp.senha]);
-    } catch(error) {
-        res.json(error);
+        const result = await client.query(
+            "INSERT INTO teadmin.responsavel (nome, sobrenome, data_nascimento, sexo, cpf, email, senha) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id_responsavel",
+            [novo.nome, novo.sobrenome, novo.data_nascimento, novo.sexo, novo.cpf, novo.email, novo.senha]
+        );
+
+        const idResponsavel = result.rows[0].id_responsavel;
+
+        await client.query(
+            "INSERT INTO teadmin.paciente_responsavel(id_paciente, id_responsavel, grau_parentesco, responsavel_principal) VALUES ($1,$2,$3,$4)",
+            [novo.id_paciente, idResponsavel, novo.parentesco, true]
+        );
+
+        res.json({ mensagem: 'Responsável cadastrado com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ mensagem: error.message });
     } finally {
         client.release();
     }
-})
+});
 
 app.post("/cadastro/paciente", verificarLogin([2]), async (req,res)=>{
     const client = await db.connect();

@@ -76,6 +76,7 @@ function validarFormulario() {
         { id: 'parentesco', label: 'Parentesco / Vínculo'  },
         { id: 'telefone',   label: 'Telefone Principal'    },
         { id: 'email',      label: 'E-mail'                },
+        { id: 'paciente_vinculado', label: 'Paciente Vinculado' },
         { id: 'senha',      label: 'Senha de acesso'       }
     ];
     for (const campo of obrigatorios) {
@@ -100,8 +101,10 @@ async function salvarResponsavel() {
         sexo:            document.getElementById('sexo').value,
         cpf:             document.getElementById('cpf').value.replace(/\D/g, ''),
         email:           document.getElementById('email').value.trim(),
-        senha:           document.getElementById('senha').value
-    };
+        senha:           document.getElementById('senha').value,
+        id_paciente:     document.getElementById('paciente_vinculado').value, // <- faltava
+        parentesco:      document.getElementById('parentesco').value           // <- faltava
+};
 
     try {
         const res   = await fetch('/cadastro/responsavel', {
