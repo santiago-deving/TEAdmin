@@ -327,6 +327,61 @@ app.get('/ver_freq/todos', verificarLogin(), async (req, res) => {
     }
 });
 
+app.get('/send_freq_responsavel', verificarLogin([0]), async (req, res) => {
+    const client = await db.connect();
+    try {
+        const user = req.session.usuario;
+
+        // Pega o id_paciente vinculado ao responsável
+        const pacienteRaw = await client.query(
+            'SELECT id_paciente FROM teadmin.paciente_responsavel WHERE id_responsavel = $1',
+            [user.id_responsavel]
+        );
+
+        if (pacienteRaw.rows.length === 0) {
+            return res.json([]);
+        }
+
+        const id_paciente = pacienteRaw.rows[0].id_paciente;
+
+        // Pega todos os profissionais que atenderam esse paciente
+        const profissionaisRaw = await client.query(
+            `SELECT DISTINCT c.id_profissional, p.nome, p.especialidade
+             FROM teadmin.consulta c
+             JOIN teadmin.profissional p ON p.id_profissional = c.id_profissional
+             WHERE c.id_paciente = $1`,
+            [id_paciente]
+        );
+
+        const resultado = [];
+
+        for (const prof of profissionaisRaw.rows) {
+            // Frequência via função do BD já existente
+            const freqRaw = await client.query(
+                'SELECT teadmin.calcfreq($1, $2)',
+                [id_paciente, prof.id_profissional]
+            );
+
+            const row = freqRaw.rows[0];
+            const freq = parseFloat(row[Object.keys(row)[0]]) || 0;
+
+            resultado.push({
+                id_profissional: prof.id_profissional,
+                nome: prof.nome,
+                especialidade: prof.especialidade,
+                frequencia: freq
+            });
+        }
+
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro /send_freq_responsavel:', error);
+        res.status(500).json({ erro: error.message });
+    } finally {
+        client.release();
+    }
+});
+
 app.get("/logout", (req, res) => {
     req.session.destroy();
     res.redirect("/login");

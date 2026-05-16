@@ -35,28 +35,33 @@ async function sendPacienteDados() {
 // substituindo o objeto dadosUsuario que era simulado localmente
 async function init() {
     const dadosResponsavel = await sendUser();
-    const dadosConsultas = await sendPacienteDados();
+    const freqTerapeutas = await getData('/send_freq_responsavel');
 
     document.getElementById('nome-usuario').textContent = dadosResponsavel.nome;
     document.getElementById('nome-boas-vindas').textContent = dadosResponsavel.nome;
 
-    // Preenche a lista de frequência com dados reais do backend
     const lista = document.getElementById('frequencia-lista');
 
-    if (dadosResponsavel.terapeutas.length === 0) {
+    if (!freqTerapeutas || freqTerapeutas.length === 0) {
         lista.innerHTML = '<p class="carregando">Nenhum dado disponível ainda.</p>';
-    } else {
-        lista.innerHTML = dadosResponsavel.terapeutas.map(t => `
+        return;
+    }
+
+    lista.innerHTML = freqTerapeutas.map(t => {
+        const freq = t.frequencia;
+        const cor = freq >= 90 ? 'var(--verde)' : freq >= 70 ? '#f9a825' : 'var(--vermelho)';
+
+        return `
             <div class="frequencia-card">
                 <p class="terapeuta-nome">${t.nome} (${t.especialidade})</p>
                 <div class="barra-container">
-                    <div class="barra" style="width: ${t.presenca}%; background-color: ${t.presenca === 100 ? 'var(--verde)' : 'var(--azul)'};">
-                        ${t.presenca}%
+                    <div class="barra" style="width: ${freq}%; background-color: ${cor};">
+                        ${freq.toFixed(1)}%
                     </div>
                 </div>
             </div>
-        `).join('');
-    }
+        `;
+    }).join('');
 }
 
 init();
