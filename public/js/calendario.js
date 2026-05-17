@@ -55,29 +55,30 @@ function preencherSelectTerapeutas(idSelecionado = null) {
 
 // ----- Configura visibilidade dos campos conforme tipo e modo -----
 function configurarCamposModal(modoEdicao = false) {
-    const grupoPaciente  = document.getElementById('grupo-paciente');
-    const grupoTerapeuta = document.getElementById('grupo-terapeuta');
-    const btnConfirmar   = document.getElementById('btn-confirmar');
-    const inputPaciente  = document.getElementById('modal-paciente');
-    const inputHora      = document.getElementById('modal-hora');
+    const grupoPaciente         = document.getElementById('grupo-paciente');
+    const grupoTerapeuta        = document.getElementById('grupo-terapeuta');
+    const grupoTerapeutaLeitura = document.getElementById('grupo-terapeuta-leitura');
+    const btnConfirmar          = document.getElementById('btn-confirmar');
+    const inputPaciente         = document.getElementById('modal-paciente');
+    const inputHora             = document.getElementById('modal-hora');
 
     if (tipoUsuario === 0) {
-        // Responsável: só leitura, sem botão confirmar
-        grupoPaciente.style.display  = '';
-        grupoTerapeuta.style.display = 'none';
-        btnConfirmar.style.display   = 'none';
-        inputPaciente.readOnly       = true;
-        inputHora.readOnly           = true;
+        grupoPaciente.style.display         = '';
+        grupoTerapeuta.style.display        = 'none';
+        grupoTerapeutaLeitura.style.display = '';
+        btnConfirmar.style.display          = 'none';
+        inputPaciente.readOnly              = true;
+        inputHora.readOnly                  = true;
         return;
     }
 
-    btnConfirmar.style.display   = '';
-    inputHora.readOnly           = false;
+    grupoTerapeutaLeitura.style.display = 'none';
+    btnConfirmar.style.display          = '';
+    inputHora.readOnly                  = false;
 
     if (tipoUsuario === 1) {
         grupoPaciente.style.display  = '';
         grupoTerapeuta.style.display = 'none';
-        // Em edição não deixa trocar o paciente
         inputPaciente.readOnly       = modoEdicao;
     }
 
@@ -88,26 +89,6 @@ function configurarCamposModal(modoEdicao = false) {
     }
 }
 
-// ----- Abre modal: novo agendamento -----
-function abrirModal(dateStr) {
-    if (tipoUsuario === 0) return;
-
-    dataSelecionada = dateStr;
-    const [ano, mes, dia] = dateStr.split('-');
-
-    document.getElementById('modal-titulo').textContent    = '📅 Novo Agendamento';
-    document.getElementById('modal-data').value            = `${dia}/${mes}/${ano}`;
-    document.getElementById('modal-paciente').value        = '';
-    document.getElementById('modal-hora').value            = '';
-    document.getElementById('modal-id-consulta').value     = '';
-    document.getElementById('modal-id-paciente').value     = '';
-    document.getElementById('modal-id-profissional').value = '';
-
-    preencherSelectTerapeutas();
-    configurarCamposModal(false);
-    document.getElementById('modal-overlay').classList.add('ativo');
-}
-
 // ----- Abre modal: editar consulta existente -----
 function abrirModalEdicao(evento) {
 
@@ -116,6 +97,7 @@ function abrirModalEdicao(evento) {
     dataSelecionada       = startStr;
 
     const props = evento.extendedProps;
+    
 
     document.getElementById('modal-titulo').textContent    = tipoUsuario === 0 ? '📅 Detalhes da Consulta' : '📅 Editar Consulta';
     document.getElementById('modal-data').value            = `${dia}/${mes}/${ano}`;
@@ -124,6 +106,7 @@ function abrirModalEdicao(evento) {
     document.getElementById('modal-id-consulta').value     = props.id_consulta;
     document.getElementById('modal-id-paciente').value     = props.id_paciente;
     document.getElementById('modal-id-profissional').value = props.id_profissional;
+    document.getElementById('modal-terapeuta-nome').value = props.terapeuta || 'Não informado';
 
     preencherSelectTerapeutas(props.id_profissional);
     configurarCamposModal(true);
@@ -244,8 +227,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Terapeutas: só carrega se admin
+    // Terapeutas: carrega para admin E responsável
     let terapeutaMap = {};
-    if (tipoUsuario === 2) {
+    if (tipoUsuario === 2 || tipoUsuario === 0) {
         const dadosTerapeutas = await getData('/send_dados_terapeutas');
         listaTerapeutas = dadosTerapeutas?.terapeutas ?? [];
         listaTerapeutas.forEach(t => { terapeutaMap[t.id_profissional] = t.nome; });
