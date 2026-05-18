@@ -89,6 +89,25 @@ function configurarCamposModal(modoEdicao = false) {
     }
 }
 
+function abrirModal(dateStr) {
+    if (tipoUsuario === 0) return;
+
+    dataSelecionada = dateStr;
+    const [ano, mes, dia] = dateStr.split('-');
+
+    document.getElementById('modal-titulo').textContent    = '📅 Novo Agendamento';
+    document.getElementById('modal-data').value            = `${dia}/${mes}/${ano}`;
+    document.getElementById('modal-paciente').value        = '';
+    document.getElementById('modal-hora').value            = '';
+    document.getElementById('modal-id-consulta').value     = '';
+    document.getElementById('modal-id-paciente').value     = '';
+    document.getElementById('modal-id-profissional').value = '';
+
+    preencherSelectTerapeutas();
+    configurarCamposModal(false);
+    document.getElementById('modal-overlay').classList.add('ativo');
+}
+
 // ----- Abre modal: editar consulta existente -----
 function abrirModalEdicao(evento) {
 
